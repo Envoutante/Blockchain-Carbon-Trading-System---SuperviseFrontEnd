@@ -48,7 +48,7 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="编号" width="95">
+      <el-table-column align="center" label="编号" width="60">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
@@ -97,7 +97,11 @@
             >查看</el-button
           >
         </router-link>
-        <el-button type="danger" icon="el-icon-delete" size="mini"
+        <el-button
+          type="danger"
+          icon="el-icon-delete"
+          size="mini"
+          @click="warning"
           >删除</el-button
         >
       </el-table-column>
@@ -150,6 +154,25 @@ export default {
         this.list = response.data.items;
         this.listLoading = false;
       });
+    },
+    warning() {
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "删除成功!",
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);

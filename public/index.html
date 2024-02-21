@@ -10,8 +10,19 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title><%= webpackConfig.name %></title>
     <style>
+      /* 隐藏滚动条 */
       body::-webkit-scrollbar {
         display: none;
+      }
+      /* 避免消息框弹出页面抖动 */
+      html {
+        width: 100vw;
+        overflow-x: hidden;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        padding-right: 0px !important;
       }
     </style>
   </head>

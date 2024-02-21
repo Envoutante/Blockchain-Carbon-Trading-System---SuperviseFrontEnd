@@ -5,8 +5,9 @@ const { param2Obj } = require("./utils");
 const user = require("./user");
 const table = require("./table");
 const company2 = require("./company2");
+const transaction = require("./transaction");
 
-const mocks = [...user, ...table, ...company2];
+const mocks = [...user, ...table, ...company2, ...transaction];
 
 // for front mock
 // please use it cautiously, it will redefine XMLHttpRequest,

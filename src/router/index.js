@@ -52,7 +52,7 @@ export const constantRoutes = [
         path: "dashboard",
         name: "Dashboard",
         component: () => import("@/views/dashboard/index"),
-        meta: { title: "Dashboard", icon: "dashboard" },
+        meta: { title: "仪表盘", icon: "dashboard" },
       },
     ],
   },
@@ -79,17 +79,15 @@ export const constantRoutes = [
   },
 
   {
-    path: "/example",
+    path: "/tree",
     component: Layout,
-    redirect: "/example/table",
-    name: "Example",
-    meta: { title: "Example", icon: "el-icon-s-help" },
+    redirect: "/tree",
     children: [
       {
         path: "tree",
         name: "Tree",
         component: () => import("@/views/tree/index"),
-        meta: { title: "Tree", icon: "tree" },
+        meta: { title: "企业碳交易", icon: "tree" },
       },
     ],
   },

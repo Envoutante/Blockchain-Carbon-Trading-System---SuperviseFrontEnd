@@ -4,9 +4,15 @@ import "normalize.css/normalize.css"; // A modern alternative to CSS resets
 
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
+// 避免页面抖动
+ElementUI.Dialog.props.lockScroll.default = false;
 // 取消英文显示
 // import locale from "element-ui/lib/locale/lang/en"; // lang i18n
 import locale from "element-ui/lib/locale/lang/zh-CN.js";
+
+// dataV 数据可视化
+import dataV from "@jiaminghi/data-view";
+Vue.use(dataV);
 
 import "@/styles/index.scss"; // global css
 
