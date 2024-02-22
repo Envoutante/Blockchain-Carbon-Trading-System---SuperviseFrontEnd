@@ -6,8 +6,9 @@ const user = require("./user");
 const table = require("./table");
 const company2 = require("./company2");
 const transaction = require("./transaction");
+const form = require("./form");
 
-const mocks = [...user, ...table, ...company2, ...transaction];
+const mocks = [...user, ...table, ...company2, ...transaction, ...form];
 
 // for front mock
 // please use it cautiously, it will redefine XMLHttpRequest,
