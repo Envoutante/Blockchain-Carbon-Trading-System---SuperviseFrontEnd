@@ -9,19 +9,44 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <el-dropdown class="avatar-container" trigger="click">
+      <!-- 导航菜单 -->
+      <el-menu
+        :default-active="activeIndex"
+        class="el-menu-demo"
+        mode="horizontal"
+        @select="handleSelect"
+        style="float: left"
+        menu-trigger="click"
+        @open="open"
+        unique-opened="true"
+      >
+        <el-submenu index="1">
+          <template slot="title"
+            ><span v-if="language === 1">中文</span>
+            <span v-if="language === 2">英文</span>
+          </template>
+          <el-menu-item>中文</el-menu-item>
+          <el-menu-item>英文</el-menu-item>
+        </el-submenu>
+        <el-menu-item index="2"
+          ><span>消息中心</span><el-badge is-dot class="item"
+        /></el-menu-item>
+        <el-submenu index="3">
+          <template slot="title"
+            ><span v-if="userType === 1">数据审核员</span>
+            <span v-if="userType === 2">监管员</span>
+            <span v-if="userType === 3">管理员</span></template
+          >
+          <el-menu-item><router-link to="/">主页</router-link></el-menu-item>
+          <el-menu-item @click="logout">退出</el-menu-item>
+        </el-submenu>
+      </el-menu>
+
+      <div class="avatar-container" style="float: right">
         <div class="avatar-wrapper">
           <img :src="avatar + '?imageView2/1/w/80/h/80'" class="user-avatar" />
         </div>
-        <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <router-link to="/">
-            <el-dropdown-item>主页</el-dropdown-item>
-          </router-link>
-          <el-dropdown-item divided @click.native="logout">
-            <span style="display: block">退出</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +64,12 @@ export default {
   computed: {
     ...mapGetters(["sidebar", "avatar"]),
   },
+  data() {
+    return {
+      language: 1,
+      userType: 1,
+    };
+  },
   methods: {
     toggleSideBar() {
       this.$store.dispatch("app/toggleSideBar");
@@ -46,6 +77,11 @@ export default {
     async logout() {
       await this.$store.dispatch("user/logout");
       this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+    },
+    open(index) {
+      let element = document.querySelector(".el-menu--popup");
+      element.style.minWidth = "70px";
+      element.style.margin = "7px 0 0 15px";
     },
   },
 };
@@ -128,8 +164,33 @@ export default {
     }
   }
 }
+</style>
 
+<style scoped>
 .el-popper {
   margin-top: -5px;
+}
+
+.el-menu-item,
+.el-submenu /deep/ .el-submenu__title {
+  height: 50px;
+  line-height: 50px;
+  border-bottom: 0px;
+}
+
+.el-menu-item.is-active,
+.el-submenu.is-active /deep/ .el-submenu__title {
+  color: #909399;
+  border-bottom: 0px;
+}
+
+.el-menu--collapse .el-menu .el-submenu,
+.el-submenu /deep/ .el-menu--popup {
+  min-width: 100px;
+}
+
+.item {
+  margin-top: -6px;
+  margin-left: 6px;
 }
 </style>

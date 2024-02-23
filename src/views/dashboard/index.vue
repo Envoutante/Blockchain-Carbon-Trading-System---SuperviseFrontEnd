@@ -1,30 +1,32 @@
 <template>
   <div class="dashboard-container">
-    <el-row :gutter="0">
-      <el-col :span="8">
-        <dv-decoration-8 style="width: 300px; height: 50px; float: left"
-      /></el-col>
-      <el-col :span="8">
-        <dv-decoration-5 style="width: 300px; height: 40px; margin: auto"
-      /></el-col>
-      <el-col :span="8">
-        <dv-decoration-8
-          :reverse="true"
-          style="width: 300px; height: 50px; float: right"
-      /></el-col>
-    </el-row>
+    <dv-border-box-13 style="padding: 20px">
+      <el-row :gutter="0">
+        <el-col :span="8">
+          <dv-decoration-8 style="width: 300px; height: 50px; float: left"
+        /></el-col>
+        <el-col :span="8">
+          <dv-decoration-5 style="width: 300px; height: 40px; margin: auto"
+        /></el-col>
+        <el-col :span="8">
+          <dv-decoration-8
+            :reverse="true"
+            style="width: 300px; height: 50px; float: right"
+        /></el-col>
+      </el-row>
 
-    <!-- 其他页面内容 -->
-    <el-row>
-      <box1 />
-    </el-row>
-    <el-row>
-      <box2 />
-    </el-row>
-    <el-row>
-      <box3 />
-    </el-row>
-    <!-- 其他页面内容 -->
+      <!-- 其他页面内容 -->
+      <el-row>
+        <box1 />
+      </el-row>
+      <el-row>
+        <box2 />
+      </el-row>
+      <el-row>
+        <box3 />
+      </el-row>
+      <!-- 其他页面内容 -->
+    </dv-border-box-13>
   </div>
 </template>
 
