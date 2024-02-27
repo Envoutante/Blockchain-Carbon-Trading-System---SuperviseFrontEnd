@@ -58,20 +58,20 @@ export const constantRoutes = [
   },
 
   {
-    path: "/table",
+    path: "/calculate",
     component: Layout,
-    redirect: "/table",
+    redirect: "/calculate",
     children: [
       {
-        path: "table",
-        name: "Table",
-        component: () => import("@/views/table/index"),
-        meta: { title: "企业碳核算", icon: "table" },
+        path: "list",
+        name: "List",
+        component: () => import("@/views/calculate/list"),
+        meta: { title: "企业碳核算", icon: "el-icon-s-check" },
       },
       {
         path: "detail/:companyType",
         name: "Detail",
-        component: () => import("@/views/table/detail"),
+        component: () => import("@/views/calculate/detail"),
         meta: { title: "企业碳核算详情" },
         hidden: true,
       },
@@ -79,89 +79,49 @@ export const constantRoutes = [
   },
 
   {
-    path: "/tree",
+    path: "/trade",
     component: Layout,
-    redirect: "/tree",
+    redirect: "/trade",
     children: [
       {
-        path: "tree",
-        name: "Tree",
-        component: () => import("@/views/tree/index"),
-        meta: { title: "企业碳交易", icon: "tree" },
+        path: "list",
+        name: "List",
+        component: () => import("@/views/trade/list"),
+        meta: { title: "企业碳交易", icon: "el-icon-s-finance" },
       },
     ],
   },
 
   {
-    path: "/form",
+    path: "/ccredits",
     component: Layout,
     children: [
       {
-        path: "index",
-        name: "Form",
-        component: () => import("@/views/form/index"),
+        path: "list",
+        name: "List",
+        component: () => import("@/views/ccredits/list"),
         meta: { title: "企业碳配额", icon: "form" },
       },
     ],
   },
 
   {
-    path: "/nested",
+    path: "/account",
     component: Layout,
-    redirect: "/nested/menu1",
-    name: "Nested",
-    meta: {
-      title: "Nested",
-      icon: "nested",
-    },
+    redirect: "/account/list",
+    meta: { title: "平台账户管理", icon: "el-icon-s-tools" },
     children: [
       {
-        path: "menu1",
-        component: () => import("@/views/nested/menu1/index"), // Parent router-view
-        name: "Menu1",
-        meta: { title: "Menu1" },
-        children: [
-          {
-            path: "menu1-1",
-            component: () => import("@/views/nested/menu1/menu1-1"),
-            name: "Menu1-1",
-            meta: { title: "Menu1-1" },
-          },
-          {
-            path: "menu1-2",
-            component: () => import("@/views/nested/menu1/menu1-2"),
-            name: "Menu1-2",
-            meta: { title: "Menu1-2" },
-            children: [
-              {
-                path: "menu1-2-1",
-                component: () =>
-                  import("@/views/nested/menu1/menu1-2/menu1-2-1"),
-                name: "Menu1-2-1",
-                meta: { title: "Menu1-2-1" },
-              },
-              {
-                path: "menu1-2-2",
-                component: () =>
-                  import("@/views/nested/menu1/menu1-2/menu1-2-2"),
-                name: "Menu1-2-2",
-                meta: { title: "Menu1-2-2" },
-              },
-            ],
-          },
-          {
-            path: "menu1-3",
-            component: () => import("@/views/nested/menu1/menu1-3"),
-            name: "Menu1-3",
-            meta: { title: "Menu1-3" },
-          },
-        ],
+        path: "list",
+        name: "List",
+        component: () => import("@/views/account/list"),
+        meta: { title: "账户详情", icon: "el-icon-tickets" },
       },
       {
-        path: "menu2",
-        component: () => import("@/views/nested/menu2/index"),
-        name: "Menu2",
-        meta: { title: "menu2" },
+        path: "bind",
+        name: "Bind",
+        component: () => import("@/views/account/bind"),
+        meta: { title: "企业绑定", icon: "el-icon-office-building" },
       },
     ],
   },

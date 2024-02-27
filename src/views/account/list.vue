@@ -34,7 +34,13 @@
           @click="dialogFormVisible = true"
           >新增</el-button
         >
-
+        <el-button
+          size="small"
+          type="primary"
+          icon="el-icon-edit"
+          @click="updateData()"
+          >批量编辑</el-button
+        >
         <el-button
           size="small"
           type="danger"
@@ -50,31 +56,22 @@
       style="width: 100%"
       :row-class-name="tableRowClassName"
     >
-      <el-table-column label="编号" width="60" align="center">
+      <el-table-column type="selection" width="50"> </el-table-column>
+      <el-table-column label="账户编号" width="200" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="企业名称"
+      <el-table-column label="账户名称"
         ><template slot-scope="scope">
           <span>{{ scope.row.title }}</span>
         </template></el-table-column
       >
-      <el-table-column label="企业类型"
+      <el-table-column label="账户类型"
         ><template slot-scope="scope">
           <span>{{ scope.row.companyType }}</span>
         </template></el-table-column
       >
-      <el-table-column label="碳配额" width="500"
-        ><template slot-scope="scope">
-          <span
-            ><el-progress
-              :text-inside="true"
-              :stroke-width="20"
-              :percentage="scope.row.carbonQuota / 10"
-              :format="setItemText"
-            ></el-progress></span></template
-      ></el-table-column>
       <el-table-column label="操作" width="200" align="center">
         <el-button
           type="primary"

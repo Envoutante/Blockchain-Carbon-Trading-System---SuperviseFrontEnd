@@ -16,7 +16,7 @@ const companyTypes = [
 const data = Mock.mock({
   "items|30": [
     {
-      "id|+1": 1,
+      id: "@integer(10000, 19999)",
       title: Mock.Random.ctitle(5, 10) + "公司",
       companyType: () => Mock.Random.pick(companyTypes),
       carbonQuota: "@integer(100, 900)",

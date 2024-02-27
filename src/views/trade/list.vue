@@ -44,14 +44,14 @@
           {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column label="企业名称">
+      <el-table-column label="买方企业名称">
         <template slot-scope="scope">
           {{ scope.row.title }}
         </template>
       </el-table-column>
-      <el-table-column label="标的类型" align="center" width="100">
+      <el-table-column label="卖方企业名称">
         <template slot-scope="scope">
-          {{ scope.row.objectType }}
+          {{ scope.row.title }}
         </template>
       </el-table-column>
       <el-table-column label="交易类型" align="center" width="100">
@@ -88,13 +88,6 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" width="200" align="center">
-        <el-button
-          type="success"
-          icon="el-icon-search"
-          size="mini"
-          @click="dialogFormVisible = true"
-          >查看</el-button
-        >
         <el-button
           type="danger"
           icon="el-icon-delete"
