@@ -1,4 +1,5 @@
 import Vue from "vue";
+Vue.config.devtools = true;
 
 import "normalize.css/normalize.css"; // A modern alternative to CSS resets
 
@@ -14,11 +15,27 @@ import locale from "element-ui/lib/locale/lang/zh-CN.js";
 import dataV from "@jiaminghi/data-view";
 Vue.use(dataV);
 
+// dayjs 时间戳
+import dayjs from "dayjs";
+Vue.prototype.dayjs = dayjs;
+
 import "@/styles/index.scss"; // global css
 
+// 原本的
 import App from "./App";
 import store from "./store";
 import router from "./router";
+
+// ant-design-vue
+// import { createApp } from "vue";
+// import Antd from "ant-design-vue";
+// import "ant-design-vue/dist/reset.css";
+// const app = createApp(App);
+// app.use(Antd).mount("#app");
+
+import Antd from "ant-design-vue";
+import "ant-design-vue/dist/antd.css";
+Vue.use(Antd);
 
 import "@/icons"; // icon
 import "@/permission"; // permission control

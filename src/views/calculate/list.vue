@@ -1,65 +1,5 @@
 <template>
   <div class="app-container">
-    <!-- 发布填报任务对话框 -->
-    <el-button
-      size="small"
-      type="primary"
-      icon="el-icon-edit"
-      @click="publishTaskFormVisible = true"
-      style="margin-bottom: 20px"
-      >发布填报任务</el-button
-    >
-
-    <el-dialog
-      title="发布填报任务"
-      :visible.sync="publishTaskFormVisible"
-      center
-    >
-      <el-form
-        :model="taskPublishForm"
-        style="align: center; padding-right: 50px"
-      >
-        <el-form-item label="设置填报年份" :label-width="formLabelWidth">
-          <div class="block">
-            <el-date-picker
-              v-model="taskPublishForm.taskYear"
-              value-format="yyyy"
-              type="year"
-              placeholder="选择年份"
-            >
-            </el-date-picker>
-          </div>
-        </el-form-item>
-        <el-form-item label="设置起止时间" :label-width="formLabelWidth">
-          <div class="block">
-            <el-date-picker
-              v-model="taskTimeRange"
-              type="datetimerange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="['12:00:00']"
-              :default-value="this.taskPublishForm.taskYear"
-              value-format="timestamp"
-            >
-            </el-date-picker>
-          </div>
-        </el-form-item>
-        <el-form-item label="填写任务详情" :label-width="formLabelWidth">
-          <el-input
-            type="textarea"
-            :rows="2"
-            placeholder="请输入内容"
-            v-model="taskDescription"
-          >
-          </el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="taskPublish">确 定</el-button>
-        <el-button @click="publishTaskFormVisible = false">取 消</el-button>
-      </div>
-    </el-dialog>
-
     <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline">
       <el-form-item label="企业名称">
@@ -101,64 +41,54 @@
     </el-form>
 
     <el-table
+      :data="reportList.slice(pageBegin, pageEnd)"
       v-loading="listLoading"
-      :data="list"
       element-loading-text="Loading"
-      border
+      stripe
       fit
       highlight-current-row
     >
-      <el-table-column label="编号" width="60" align="center">
+      <el-table-column prop="enterpriseID" label="组织代码" align="center" />
+      <el-table-column prop="enterpriseName" label="企业名称" align="center" />
+      <el-table-column label="行业类型" align="center">
         <template slot-scope="scope">
-          {{ scope.row.id }}
+          {{ scope.row.enterpriseClass | companyFilter }}
         </template>
       </el-table-column>
-      <el-table-column label="企业名称">
+      <el-table-column label="审核状态" align="center">
         <template slot-scope="scope">
-          {{ scope.row.title }}
+          <el-tag :type="scope.row.auditStatus | tagFilter">
+            {{ scope.row.auditStatus | statusFilter }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="企业类型">
-        <template slot-scope="scope">
-          {{ scope.row.companyType }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        class-name="status-col"
-        label="审核状态"
-        width="110"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{
-            scope.row.status
-          }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        align="center"
-        prop="created_at"
-        label="填报时间"
-        width="200"
-      >
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.displayTime }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column prop="submitTime" label="填报时间" align="center" />
+      <el-table-column prop="taskYear" label="上报年份" align="center" />
       <el-table-column label="操作" width="200" align="center">
-        <router-link :to="'/table/detail/' + '2'" style="margin-right: 10px">
-          <el-button type="success" icon="el-icon-search" size="mini"
-            >查看</el-button
+        <template slot-scope="scope">
+          <!-- {path: item.path, query: {value:chil.value, cindex:cindex}} -->
+          <!-- '/calculate/detail/' + scope.row.enterpriseID -->
+          <router-link
+            :to="
+              '/calculate/detail/' +
+              scope.row.taskYear +
+              '/' +
+              scope.row.enterpriseID
+            "
+            style="margin-right: 10px"
           >
-        </router-link>
-        <el-button
-          type="danger"
-          icon="el-icon-delete"
-          size="mini"
-          @click="warning"
-          >删除</el-button
-        >
+            <el-button type="success" icon="el-icon-search" size="mini"
+              >查看</el-button
+            >
+          </router-link>
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
+            @click="warning"
+            >删除</el-button
+          >
+        </template>
       </el-table-column>
     </el-table>
 
@@ -167,11 +97,11 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="pageNum"
         :page-sizes="[10, 20, 30, 50]"
-        :page-size="10"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="30"
+        :total="this.reportListLength"
         style="padding: 30px 0"
       >
       </el-pagination>
@@ -180,49 +110,117 @@
 </template>
 
 <script>
-import { getList } from "@/api/table";
+import calculateAPI from "@/api/calculate";
 
 export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        尚未审核: "gray",
-        通过审核: "success",
-        未通过审核: "danger",
+        PASS: "审核通过",
+        AUDIT: "审核中",
+        REFUSE: "审核拒绝",
       };
       return statusMap[status];
     },
+    tagFilter(status) {
+      const tagMap = {
+        PASS: "success",
+        AUDIT: "primary",
+        REFUSE: "danger",
+      };
+      return tagMap[status];
+    },
+    companyFilter(type) {
+      const companyMap = {
+        1: "发电企业",
+        2: "电网企业",
+        3: "钢铁生产企业",
+        4: "化工生产企业",
+        5: "电解铝生产企业",
+        6: "镁冶炼企业",
+        7: "平板玻璃生产企业",
+        8: "水泥生产企业",
+        9: "陶瓷生产企业",
+        10: "民航企业",
+      };
+      return companyMap[type];
+    },
   },
+
   data() {
+    let disabledDate = (date) => {
+      return date.getTime() < new Date().getTime() - 24 * 60 * 60 * 1000;
+    };
+
     return {
-      list: null,
+      reportList: {},
+      reportListLength: undefined,
       listLoading: true,
       dialogFormVisible: false,
-      formLabelWidth: "200px",
-      publishTaskFormVisible: false,
-      taskTimeRange: "",
-      taskPublishForm: {
-        taskYear: "",
-        taskBeginTime: "",
-        taskEndTime: "",
-        taskDescription: "",
+      formLabelWidth: "150px",
+      taskFormVisible: false,
+      taskYear: "",
+      taskBeginTime: "",
+      taskEndTime: "",
+      taskDescription: "",
+      startDateOptions: {
+        disabledDate: (time) => {
+          return (
+            time.getTime() < Date.now() ||
+            time.getTime() >= new Date(this.taskEndTime).getTime() ||
+            time.getTime() >
+              new Date().setFullYear(new Date().getFullYear() + 1, 0, 0)
+          );
+        },
       },
+      endDateOptions: {
+        disabledDate: (time) => {
+          return (
+            time.getTime() < Date.now() ||
+            time.getTime() <= new Date(this.taskBeginTime).getTime() ||
+            time.getTime() >
+              new Date().setFullYear(new Date().getFullYear() + 1, 0, 0)
+          );
+        },
+      },
+      pageBegin: 0,
+      pageEnd: 0,
+      pageSize: 10,
+      pageNum: 0,
     };
   },
+
   created() {
     this.fetchData();
+    this.pageEnd = this.pageSize;
   },
+
   methods: {
     taskPublish() {
-      this.publishTaskFormVisible = false;
-      this.taskPublishForm.taskBeginTime = this.taskTimeRange[0];
-      this.taskPublishForm.taskEndTime = this.taskTimeRange[1];
-      console.log("打印：" + this.taskPublishForm.taskYear);
+      let token = "123";
+      this.taskYear = new Date().getFullYear();
+      calculateAPI
+        .taskPublish(
+          token,
+          this.taskYear,
+          this.taskBeginTime / 1000,
+          this.taskEndTime / 1000,
+          this.taskDescription
+        )
+        .then((response) => {
+          this.$message({
+            message: response.message,
+            type: "success",
+          });
+          this.taskFormVisible = false;
+          console.log(this.taskBeginTime / 1000);
+        });
     },
     fetchData() {
       this.listLoading = true;
-      getList().then((response) => {
-        this.list = response.data.items;
+      calculateAPI.getReportList().then((response) => {
+        this.reportList = response.data.reportList;
+        this.reportListLength = this.reportList.length;
         this.listLoading = false;
       });
     },
@@ -247,9 +245,14 @@ export default {
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
+      this.pageSize = val;
+      this.pageEnd = this.pageBegin + this.pageSize;
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
+      this.pageNum = val;
+      this.pageBegin = (this.pageNum - 1) * this.pageSize;
+      this.pageEnd = this.pageBegin + this.pageSize;
     },
   },
 };

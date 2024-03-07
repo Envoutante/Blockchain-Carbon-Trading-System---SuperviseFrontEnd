@@ -25,53 +25,17 @@
       </el-form-item>
     </el-form>
 
-    <el-form :inline="true" class="demo-form-inline">
-      <el-form-item>
-        <el-button
-          size="small"
-          type="success"
-          icon="el-icon-plus"
-          @click="dialogFormVisible = true"
-          >新增</el-button
-        >
-        <el-button
-          size="small"
-          type="primary"
-          icon="el-icon-edit"
-          @click="updateData()"
-          >批量编辑</el-button
-        >
-        <el-button
-          size="small"
-          type="danger"
-          icon="el-icon-delete"
-          @click="insertData()"
-          >批量删除</el-button
-        >
-      </el-form-item>
-    </el-form>
-
+    <!-- 表格 -->
     <el-table
-      :data="list"
+      :data="userList"
       style="width: 100%"
-      :row-class-name="tableRowClassName"
+      stripe
+      v-loading="listLoading"
     >
       <el-table-column type="selection" width="50"> </el-table-column>
-      <el-table-column label="账户编号" width="200" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="账户名称"
-        ><template slot-scope="scope">
-          <span>{{ scope.row.title }}</span>
-        </template></el-table-column
-      >
-      <el-table-column label="账户类型"
-        ><template slot-scope="scope">
-          <span>{{ scope.row.companyType }}</span>
-        </template></el-table-column
-      >
+      <el-table-column prop="userID" label="账户编号" align="center" />
+      <el-table-column prop="userName" label="账户名称" align="center" />
+      <el-table-column prop="userType" label="账户类型" align="center" />
       <el-table-column label="操作" width="200" align="center">
         <el-button
           type="primary"
@@ -121,11 +85,11 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="pageNum"
         :page-sizes="[10, 20, 30, 50]"
-        :page-size="10"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="30"
+        :total="this.userListLength"
         style="padding: 30px 0"
       >
       </el-pagination>
@@ -134,20 +98,26 @@
 </template>
 
 <script>
-import { getList } from "@/api/form";
+import auditAPI from "@/api/audit";
 
 export default {
   data() {
     return {
-      list: null,
+      userList: {},
+      userListLength: undefined,
       listLoading: true,
       dialogFormVisible: false,
       formLabelWidth: "120px",
       num: 1,
+      pageBegin: 0,
+      pageEnd: 0,
+      pageSize: 10,
+      pageNum: 0,
     };
   },
   created() {
     this.fetchData();
+    this.pageEnd = this.pageSize;
   },
   methods: {
     tableRowClassName({ row, rowIndex }) {
@@ -160,8 +130,9 @@ export default {
     },
     fetchData() {
       this.listLoading = true;
-      getList().then((response) => {
-        this.list = response.data.items;
+      auditAPI.getUserList().then((response) => {
+        this.userList = response.data.userList;
+        this.userListLength = this.userList.length;
         this.listLoading = false;
       });
     },
@@ -186,6 +157,17 @@ export default {
             message: "已取消删除",
           });
         });
+    },
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+      this.pageSize = val;
+      this.pageEnd = this.pageBegin + this.pageSize;
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+      this.pageNum = val;
+      this.pageBegin = (this.pageNum - 1) * this.pageSize;
+      this.pageEnd = this.pageBegin + this.pageSize;
     },
   },
 };

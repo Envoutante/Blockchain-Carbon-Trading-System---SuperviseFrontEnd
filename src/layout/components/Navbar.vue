@@ -9,42 +9,23 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <!-- 导航菜单 -->
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu-demo"
-        mode="horizontal"
-        @select="handleSelect"
-        style="float: left"
-        menu-trigger="click"
-        @open="open"
-        unique-opened="true"
-      >
-        <el-submenu index="1">
-          <template slot="title"
-            ><span v-if="language === 1">中文</span>
-            <span v-if="language === 2">英文</span>
-          </template>
-          <el-menu-item>中文</el-menu-item>
-          <el-menu-item>英文</el-menu-item>
-        </el-submenu>
-        <el-menu-item index="2"
-          ><span>消息中心</span><el-badge is-dot class="item"
-        /></el-menu-item>
-        <el-submenu index="3">
-          <template slot="title"
-            ><span v-if="userType === 1">数据审核员</span>
-            <span v-if="userType === 2">监管员</span>
-            <span v-if="userType === 3">管理员</span></template
-          >
-          <el-menu-item><router-link to="/">主页</router-link></el-menu-item>
-          <el-menu-item @click="logout">退出</el-menu-item>
-        </el-submenu>
-      </el-menu>
-
       <div class="avatar-container" style="float: right">
         <div class="avatar-wrapper">
-          <img :src="avatar + '?imageView2/1/w/80/h/80'" class="user-avatar" />
+          <el-dropdown :hide-on-click="true" trigger="click">
+            <el-avatar
+              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+              :size="30"
+            />
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item
+                ><router-link to="/">主页</router-link></el-dropdown-item
+              >
+              <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <span style="color: #ffffff; margin-left: 10px; font-size: 15px"
+            >数据审核员</span
+          >
         </div>
       </div>
     </div>
@@ -92,7 +73,7 @@ export default {
   height: 50px;
   overflow: hidden;
   position: relative;
-  background: #fff;
+  background: #134089;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
   .hamburger-container {
@@ -140,10 +121,11 @@ export default {
     }
 
     .avatar-container {
-      margin-right: 10px;
+      margin-right: 20px;
 
       .avatar-wrapper {
-        margin-top: 5px;
+        display: flex;
+        align-items: center;
         position: relative;
 
         .user-avatar {
@@ -167,30 +149,8 @@ export default {
 </style>
 
 <style scoped>
-.el-popper {
-  margin-top: -5px;
-}
-
-.el-menu-item,
-.el-submenu /deep/ .el-submenu__title {
-  height: 50px;
-  line-height: 50px;
-  border-bottom: 0px;
-}
-
-.el-menu-item.is-active,
-.el-submenu.is-active /deep/ .el-submenu__title {
-  color: #909399;
-  border-bottom: 0px;
-}
-
-.el-menu--collapse .el-menu .el-submenu,
-.el-submenu /deep/ .el-menu--popup {
-  min-width: 100px;
-}
-
-.item {
-  margin-top: -6px;
-  margin-left: 6px;
+.el-dropdown {
+  display: flex;
+  align-items: center;
 }
 </style>

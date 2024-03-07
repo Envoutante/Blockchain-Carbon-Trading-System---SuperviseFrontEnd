@@ -32,135 +32,52 @@
     </el-form>
 
     <el-table
+      :data="tradeListEnterprise.slice(pageBegin, pageEnd)"
       v-loading="listLoading"
-      :data="list"
       element-loading-text="Loading"
-      border
+      stripe
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="编号" width="60">
+      <el-table-column prop="tradeID" label="交易编号" align="center" />
+      <el-table-column label="交易状态" align="center">
         <template slot-scope="scope">
-          {{ scope.row.id }}
+          <span v-if="scope.row.tradeStatus === 'YES'">已达成交易</span>
+          <span v-else-if="scope.row.tradeStatus === 'NO'">未达成交易</span>
         </template>
       </el-table-column>
-      <el-table-column label="买方企业名称">
+      <el-table-column prop="tradeType" label="交易类型" align="center">
         <template slot-scope="scope">
-          {{ scope.row.title }}
+          <span v-if="scope.row.tradeType === 'SOLD'">购买</span>
+          <span v-else-if="scope.row.tradeType === 'SALE'">出售</span>
         </template>
       </el-table-column>
-      <el-table-column label="卖方企业名称">
-        <template slot-scope="scope">
-          {{ scope.row.title }}
-        </template>
-      </el-table-column>
-      <el-table-column label="交易类型" align="center" width="100">
-        <template slot-scope="scope">
-          {{ scope.row.transactionType }}
-        </template>
-      </el-table-column>
-      <el-table-column label="减排量（万吨）" width="120" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.count }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        align="center"
-        prop="created_at"
-        label="日期"
-        width="180"
-      >
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.displayTime }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        class-name="status-col"
-        label="审核状态"
-        width="110"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{
-            scope.row.status
-          }}</el-tag>
-        </template>
-      </el-table-column>
+      <el-table-column prop="emission" label="交易总量" align="center" />
+      <el-table-column prop="perEmission" label="交易单价" align="center" />
+      <el-table-column prop="publishName" label="甲方企业" align="center" />
+      <!-- <el-table-column prop="orderID" label="订单编号" align="center" /> -->
       <el-table-column label="操作" width="200" align="center">
-        <el-button
-          type="danger"
-          icon="el-icon-delete"
-          size="mini"
-          @click="warning"
-          >删除</el-button
-        >
+        <template slot-scope="scope">
+          <router-link
+            :to="'/trade/detail/' + scope.row.orderID"
+            style="margin-right: 10px"
+          >
+            <el-button icon="el-icon-document-copy" size="mini">详情</el-button>
+          </router-link>
+        </template>
       </el-table-column>
     </el-table>
-
-    <!-- 对话框 -->
-    <el-dialog title="交易详情" :visible.sync="dialogFormVisible">
-      <el-form :model="form">
-        <el-form-item label="项目所在地" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="项目类别" :label-width="formLabelWidth">
-          <el-select v-model="form.region" placeholder="请选择">
-            <el-option value="1" label="树林"></el-option>
-            <el-option value="1" label="风能"></el-option>
-            <el-option value="1" label="太阳能"></el-option>
-            <el-option value="1" label="水电"></el-option>
-            <el-option value="1" label="生物质发电"></el-option>
-            <el-option value="1" label="沼气发电"></el-option>
-            <el-option value="1" label="其他"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="出售数量" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="出售单价" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="公司名称" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="项目负责人" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="手机" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="项目说明" :label-width="formLabelWidth">
-          <el-input
-            type="textarea"
-            :rows="2"
-            placeholder="请输入内容"
-            v-model="textarea"
-          >
-          </el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >确 定</el-button
-        >
-      </div>
-    </el-dialog>
 
     <!-- 分页 -->
     <div class="block">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="pageNum"
         :page-sizes="[10, 20, 30, 50]"
-        :page-size="10"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="30"
+        :total="this.tradeListEnterpriseLength"
         style="padding: 30px 0"
       >
       </el-pagination>
@@ -169,7 +86,7 @@
 </template>
 
 <script>
-import { getList } from "@/api/transaction";
+import tradeAPI from "@/api/trade";
 
 export default {
   filters: {
@@ -185,31 +102,29 @@ export default {
   },
   data() {
     return {
-      list: null,
+      tradeListEnterprise: [],
+      tradeListEnterpriseLength: undefined,
       listLoading: true,
       dialogTableVisible: false,
       dialogFormVisible: false,
-      form: {
-        name: "",
-        region: "",
-        date1: "",
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
-      },
       formLabelWidth: "120px",
+      pageBegin: 0,
+      pageEnd: 0,
+      pageSize: 10,
+      pageNum: 0,
     };
   },
   created() {
     this.fetchData();
+    this.pageEnd = this.pageSize;
   },
   methods: {
     fetchData() {
       this.listLoading = true;
-      getList().then((response) => {
-        this.list = response.data.items;
+      tradeAPI.getTradeList("123").then((response) => {
+        this.tradeListEnterprise = response.data.tradeListEnterprise;
+        console.log("内容为：" + response);
+        this.tradeListEnterpriseLength = this.tradeListEnterprise.length;
         this.listLoading = false;
       });
     },
@@ -234,9 +149,14 @@ export default {
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
+      this.pageSize = val;
+      this.pageEnd = this.pageBegin + this.pageSize;
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
+      this.pageNum = val;
+      this.pageBegin = (this.pageNum - 1) * this.pageSize;
+      this.pageEnd = this.pageBegin + this.pageSize;
     },
   },
 };
