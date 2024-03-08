@@ -20,7 +20,11 @@
               <el-dropdown-item
                 ><router-link to="/">主页</router-link></el-dropdown-item
               >
+              <!-- <el-dropdown-item @click.native="logout">退出</el-dropdown-item> -->
               <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+              <!-- <el-dropdown-item
+                ><router-link to="/login">退出</router-link></el-dropdown-item
+              > -->
             </el-dropdown-menu>
           </el-dropdown>
           <span style="color: #ffffff; margin-left: 10px; font-size: 15px"
@@ -36,6 +40,7 @@
 import { mapGetters } from "vuex";
 import Breadcrumb from "@/components/Breadcrumb";
 import Hamburger from "@/components/Hamburger";
+import Cookies from "js-cookie";
 
 export default {
   components: {
@@ -55,9 +60,36 @@ export default {
     toggleSideBar() {
       this.$store.dispatch("app/toggleSideBar");
     },
-    async logout() {
-      await this.$store.dispatch("user/logout");
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+    // async logout() {
+    //   await this.$store.dispatch("user/logout");
+    //   this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+    // },
+    logout() {
+      this.$confirm("确定退出系统?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "info",
+      })
+        .then(() => {
+          // this.$store.dispatch("logout");
+          // this.$store.commit("SET_PERMS", "");
+          this.$message({
+            type: "success",
+            message: "退出系统成功！",
+          });
+          setTimeout(() => {
+            // 最重要的就是这个,删除cookies
+            Cookies.remove("token");
+            location.reload(); // 不能省，强制跳到登陆页
+            this.$router.push(`/login`);
+          }, 1000);
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消退出",
+          });
+        });
     },
     open(index) {
       let element = document.querySelector(".el-menu--popup");

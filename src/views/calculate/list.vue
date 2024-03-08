@@ -2,23 +2,20 @@
   <div class="app-container">
     <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline">
-      <el-form-item label="企业名称">
-        <el-input size="small" placeholder="企业名称" />
+      <el-form-item label="企业名">
+        <el-input
+          v-model="searchForm.enterpriseName"
+          size="small"
+          placeholder="请输入企业名"
+        />
       </el-form-item>
 
-      <el-form-item label="企业类型">
-        <el-select size="small" placeholder="请选择" clearable>
-          <el-option value="1" label="电网企业" />
-          <el-option value="1" label="化工生产企业" />
-          <el-option value="1" label="电解铝生产企业" />
-          <el-option value="1" label="镁冶炼企业" />
-          <el-option value="1" label="平板玻璃生产企业" />
-          <el-option value="1" label="水泥生产企业" />
-          <el-option value="1" label="陶瓷生产企业" />
-          <el-option value="1" label="民航企业" />
-          <el-option value="1" label="钢铁生产企业" />
-          <el-option value="1" label="发电企业" />
-        </el-select>
+      <el-form-item label="企业组织机构代码">
+        <el-input
+          v-model="searchForm.enterpriseID"
+          size="small"
+          placeholder="请输入企业组织机构代码"
+        />
       </el-form-item>
 
       <el-form-item>
@@ -26,44 +23,104 @@
           size="small"
           type="primary"
           icon="el-icon-search"
-          @click="fetchData()"
+          @click="handleSearch"
         >
           查询
         </el-button>
+
         <el-button
           size="small"
           type="primary"
           icon="el-icon-refresh-left"
-          @click="resetData()"
+          @click="handleReset"
           >清空</el-button
         >
       </el-form-item>
     </el-form>
 
     <el-table
-      :data="reportList.slice(pageBegin, pageEnd)"
+      :data="tableData.slice(pageBegin, pageEnd)"
       v-loading="listLoading"
       element-loading-text="Loading"
       stripe
       fit
       highlight-current-row
+      :default-sort="{ prop: 'taskYear', order: 'descending' }"
     >
-      <el-table-column prop="enterpriseID" label="组织代码" align="center" />
-      <el-table-column prop="enterpriseName" label="企业名称" align="center" />
-      <el-table-column label="行业类型" align="center">
+      <el-table-column
+        prop="enterpriseID"
+        label="企业组织机构代码"
+        align="center"
+        sortable
+      />
+      <el-table-column
+        prop="enterpriseName"
+        label="企业名"
+        align="center"
+        sortable
+      />
+      <el-table-column
+        prop="enterpriseClass"
+        label="企业所处行业"
+        align="center"
+        :filters="[
+          { text: '发电企业', value: '1' },
+          { text: '电网企业', value: '2' },
+          { text: '钢铁生产企业', value: '3' },
+          { text: '化工生产企业', value: '4' },
+          { text: '电解铝生产企业', value: '5' },
+          { text: '镁冶炼企业', value: '6' },
+          { text: '平板玻璃生产企业', value: '7' },
+          { text: '水泥生产企业', value: '8' },
+          { text: '陶瓷生产企业', value: '9' },
+          { text: '民航企业', value: '10' },
+        ]"
+        :filter-method="filterCompany"
+        filter-placement="bottom-end"
+      >
         <template slot-scope="scope">
           {{ scope.row.enterpriseClass | companyFilter }}
         </template>
       </el-table-column>
-      <el-table-column label="审核状态" align="center">
+      <el-table-column
+        prop="auditStatus"
+        label="审核状态"
+        align="center"
+        :filters="[
+          { text: '审核通过', value: 'PASS' },
+          { text: '审核中', value: 'AUDIT' },
+          { text: '审核拒绝', value: 'REFUSE' },
+          { text: '待审核', value: 'WAIT' },
+        ]"
+        :filter-method="filterStatus"
+        filter-placement="bottom-end"
+      >
         <template slot-scope="scope">
           <el-tag :type="scope.row.auditStatus | tagFilter">
             {{ scope.row.auditStatus | statusFilter }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="submitTime" label="填报时间" align="center" />
-      <el-table-column prop="taskYear" label="上报年份" align="center" />
+      <el-table-column
+        prop="submitTime"
+        label="填报时间"
+        align="center"
+        sortable
+      >
+        <template slot-scope="scope">
+          {{
+            dayjs(parseInt(scope.row.submitTime) * 1000).format(
+              "YYYY[年]-MM[月]-DD[日]"
+            )
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="taskYear"
+        label="上报年份"
+        align="center"
+        sortable
+      />
       <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
           <!-- {path: item.path, query: {value:chil.value, cindex:cindex}} -->
@@ -77,23 +134,17 @@
             "
             style="margin-right: 10px"
           >
-            <el-button type="success" icon="el-icon-search" size="mini"
-              >查看</el-button
-            >
+            <!-- <el-button type="success" icon="el-icon-search" size="mini"
+              >查看详情</el-button
+            > -->
+            <el-link type="primary" :underline="false">查看详情</el-link>
           </router-link>
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-            @click="warning"
-            >删除</el-button
-          >
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 分页 -->
-    <div class="block">
+    <div style="display: flex; justify-content: right">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -119,6 +170,7 @@ export default {
         PASS: "审核通过",
         AUDIT: "审核中",
         REFUSE: "审核拒绝",
+        WAIT: "待审核",
       };
       return statusMap[status];
     },
@@ -127,6 +179,7 @@ export default {
         PASS: "success",
         AUDIT: "primary",
         REFUSE: "danger",
+        WAIT: "info",
       };
       return tagMap[status];
     },
@@ -153,40 +206,17 @@ export default {
     };
 
     return {
+      tableData: {},
       reportList: {},
       reportListLength: undefined,
       listLoading: true,
       dialogFormVisible: false,
       formLabelWidth: "150px",
-      taskFormVisible: false,
-      taskYear: "",
-      taskBeginTime: "",
-      taskEndTime: "",
-      taskDescription: "",
-      startDateOptions: {
-        disabledDate: (time) => {
-          return (
-            time.getTime() < Date.now() ||
-            time.getTime() >= new Date(this.taskEndTime).getTime() ||
-            time.getTime() >
-              new Date().setFullYear(new Date().getFullYear() + 1, 0, 0)
-          );
-        },
-      },
-      endDateOptions: {
-        disabledDate: (time) => {
-          return (
-            time.getTime() < Date.now() ||
-            time.getTime() <= new Date(this.taskBeginTime).getTime() ||
-            time.getTime() >
-              new Date().setFullYear(new Date().getFullYear() + 1, 0, 0)
-          );
-        },
-      },
       pageBegin: 0,
       pageEnd: 0,
       pageSize: 10,
       pageNum: 0,
+      searchForm: { enterpriseID: "", enterpriseName: "" },
     };
   },
 
@@ -196,13 +226,31 @@ export default {
   },
 
   methods: {
+    handleSearch() {
+      let form = this.searchForm;
+      let tableList = this.reportList;
+      // 筛选后的数据
+      const filterList = tableList.filter((item) => {
+        return Object.values(form).every((key, index) => {
+          return item[Object.keys(form)[index]].includes(key);
+        });
+      });
+      this.tableData = filterList;
+    },
+    handleReset() {
+      this.tableData = this.reportList;
+      this.searchForm.enterpriseID = "";
+      this.searchForm.enterpriseName = "";
+    },
+
     taskPublish() {
       let token = "123";
       this.taskYear = new Date().getFullYear();
+      let taskYearInt = parseInt(this.taskYear);
       calculateAPI
         .taskPublish(
           token,
-          this.taskYear,
+          taskYearInt,
           this.taskBeginTime / 1000,
           this.taskEndTime / 1000,
           this.taskDescription
@@ -221,6 +269,7 @@ export default {
       calculateAPI.getReportList().then((response) => {
         this.reportList = response.data.reportList;
         this.reportListLength = this.reportList.length;
+        this.tableData = this.reportList;
         this.listLoading = false;
       });
     },
@@ -242,6 +291,15 @@ export default {
             message: "已取消删除",
           });
         });
+    },
+    formatter(row, column) {
+      return row.address;
+    },
+    filterStatus(value, row) {
+      return row.auditStatus === value.toString();
+    },
+    filterCompany(value, row) {
+      return row.enterpriseClass === parseInt(value);
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);

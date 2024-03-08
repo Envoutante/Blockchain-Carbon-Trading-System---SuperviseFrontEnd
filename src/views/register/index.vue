@@ -9,64 +9,11 @@
             class="user-layout-content-inner"
             style="
               width: auto;
-              background-color: #d2d2d2;
-              border-left: 2px solid #f0f2f5;
-              border-top: 2px solid #f0f2f5;
-              border-bottom: 2px solid #f0f2f5;
-
-              width: 500px;
-              height: 563px;
-              padding: 0px;
-              border-radius: 10px 0 0 10px;
-            "
-          >
-            <el-row type="flex" justify="center">
-              <el-col :span="20">
-                <el-carousel
-                  height="560px"
-                  direction="horizontal"
-                  :autoplay="true"
-                  :interval="3000"
-                  indicator-position="none"
-                >
-                  <el-carousel-item>
-                    <img
-                      src="@/assets/pages/user/login/login_bg_1.jpg"
-                      style="max-height: 560px"
-                    />
-                  </el-carousel-item>
-                  <el-carousel-item>
-                    <img
-                      src="@/assets/pages/user/login/login_bg_2.jpg"
-                      style="max-height: 560px"
-                    />
-                  </el-carousel-item>
-                  <el-carousel-item>
-                    <img
-                      src="@/assets/pages/user/login/login_bg_3.jpg"
-                      style="max-height: 560px"
-                    />
-                  </el-carousel-item>
-                  <el-carousel-item>
-                    <img
-                      src="@/assets/pages/user/login/login_bg_4.jpg"
-                      style="max-height: 560px"
-                    />
-                  </el-carousel-item>
-                </el-carousel>
-              </el-col>
-            </el-row>
-          </div>
-
-          <div
-            class="user-layout-content-inner"
-            style="
-              width: auto;
               background-color: white;
               border-right: 2px solid #f0f2f5;
               border-top: 2px solid #f0f2f5;
               border-bottom: 2px solid #f0f2f5;
-              border-radius: 0px 10px 10px 0px;
+              border-radius: 10px 10px 10px 10px;
 
               width: 500px;
               height: 563px;
@@ -114,28 +61,39 @@
             <!-- 用户登录表单 -->
             <div class="user-layout-login">
               <el-form
-                ref="loginForm"
-                :model="loginForm"
+                ref="registerForm"
+                :model="registerForm"
                 :rules="loginRules"
-                class="login-form"
                 auto-complete="on"
-                label-width="80px"
               >
+                <el-form-item>
+                  <el-radio-group v-model="registerForm.Role" size="small">
+                    <el-radio-button label="1" border
+                      >数据审核员</el-radio-button
+                    >
+                    <el-radio-button label="2" border
+                      >第三方监管机构</el-radio-button
+                    >
+                    <el-radio-button label="3" border>管理员</el-radio-button>
+                  </el-radio-group>
+                </el-form-item>
+
                 <el-form-item>
                   <el-input
                     style="width: 350px"
                     prefix-icon="el-icon-user"
-                    placeholder="请输入账户名"
-                    v-model="loginForm.userName"
+                    placeholder="请设置账户名"
+                    v-model="registerForm.userName"
                   ></el-input>
                 </el-form-item>
+
                 <el-form-item>
                   <el-input
                     style="width: 350px"
                     show-password
                     prefix-icon="el-icon-lock"
-                    placeholder="请输入密码"
-                    v-model="loginForm.userPwd"
+                    placeholder="请设置账户密码"
+                    v-model="registerForm.userPwd"
                   ></el-input>
                 </el-form-item>
 
@@ -148,32 +106,26 @@
                       border-radius: 8px;
                       font-size: 15px;
                     "
-                    @click.native.prevent="handleLogin"
-                    >监管端登录</el-button
-                  ></el-form-item
-                >
-                <el-form-item>
-                  <div style="width: 350px">
-                    <router-link
-                      :to="'/register'"
-                      style="float: left; color: #1890ff"
-                      >注册监管端账户</router-link
-                    ><router-link
-                      :to="'/user/forget'"
-                      style="float: right; color: #1890ff"
-                      >忘记密码</router-link
+                    @click="handleRegister"
+                    >监管用户注册</el-button
+                  >
+                  <div>
+                    <span>已有账号？</span
+                    ><router-link :to="'/login'" style="color: #1890ff"
+                      >登录</router-link
                     >
                   </div></el-form-item
                 >
+
                 <el-form-item
                   style="
-                    margin-top: 80px;
+                    margin-top: 40px;
                     box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.2);
                   "
                 >
                   <div style="width: 350px; padding: 5px">
                     <router-link
-                      :to="'/user/register'"
+                      :to="'/register'"
                       style="float: left; color: #134089"
                       ><svg
                         t="1709624066310"
@@ -225,7 +177,7 @@
 </template>
 
 <script>
-import { validUsername } from "@/utils/validate";
+import registerAPI from "@/api/register";
 
 export default {
   name: "Login",
@@ -237,6 +189,7 @@ export default {
         callback();
       }
     };
+
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
         callback(new Error("The password can not be less than 6 digits"));
@@ -244,12 +197,12 @@ export default {
         callback();
       }
     };
+
     return {
-      loginForm: {
-        // userName: "cstring",
-        // userPwd: "cstring",
-        userName: this.$route.query.userName,
-        userPwd: this.$route.query.userPwd,
+      registerForm: {
+        Role: null,
+        userName: "",
+        userPwd: "",
       },
       loginRules: {
         userName: [
@@ -262,10 +215,9 @@ export default {
       loading: false,
       passwordType: "password",
       redirect: undefined,
-      remember: "",
-      rememberCheck: false,
     };
   },
+
   watch: {
     $route: {
       handler: function (route) {
@@ -274,6 +226,7 @@ export default {
       immediate: true,
     },
   },
+
   methods: {
     showPwd() {
       if (this.passwordType === "password") {
@@ -285,28 +238,35 @@ export default {
         this.$refs.password.focus();
       });
     },
-    handleLogin() {
-      this.$refs.loginForm.validate((valid) => {
-        if (valid) {
-          this.loading = true;
-          this.$store
-            .dispatch("user/login", this.loginForm)
-            .then(() => {
-              this.$router.push({ path: this.redirect || "/" });
-              this.loading = false;
-              this.$message({
-                type: "success",
-                message: "欢迎登录碳盟链道！",
-              });
-            })
-            .catch(() => {
-              this.loading = false;
+
+    handleRegister() {
+      if (
+        !this.registerForm.userName ||
+        !this.registerForm.userPwd ||
+        !this.registerForm.Role
+      ) {
+        this.$message({
+          message: "请完善账户信息后再提交！",
+          type: "warning",
+        });
+      } else {
+        let Role = parseInt(this.registerForm.Role);
+        registerAPI
+          .register(this.registerForm.userName, this.registerForm.userPwd, Role)
+          .then((response) => {
+            this.$message({
+              message: response.message,
+              type: "success",
             });
-        } else {
-          console.log("error submit!!");
-          return false;
-        }
-      });
+            this.$router.push({
+              path: "/login",
+              query: {
+                userName: this.registerForm.userName,
+                userPwd: this.registerForm.userPwd,
+              },
+            });
+          });
+      }
     },
   },
 };

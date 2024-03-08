@@ -2,8 +2,20 @@
   <div class="app-container">
     <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline">
-      <el-form-item label="企业名称">
-        <el-input size="small" placeholder="企业名称" />
+      <el-form-item label="账户编号">
+        <el-input
+          v-model="searchForm.userID"
+          size="small"
+          placeholder="请输入账户编号"
+        />
+      </el-form-item>
+
+      <el-form-item label="账户名称">
+        <el-input
+          v-model="searchForm.userName"
+          size="small"
+          placeholder="请输入账户名称"
+        />
       </el-form-item>
 
       <el-form-item>
@@ -11,15 +23,16 @@
           size="small"
           type="primary"
           icon="el-icon-search"
-          @click="fetchData()"
+          @click="handleSearch"
         >
           查询
         </el-button>
+
         <el-button
           size="small"
           type="primary"
           icon="el-icon-refresh-left"
-          @click="resetData()"
+          @click="handleReset"
           >清空</el-button
         >
       </el-form-item>
@@ -30,15 +43,32 @@
 
     <!-- 表格 -->
     <el-table
-      :data="bindList.slice(pageBegin, pageEnd)"
+      :data="tableData.slice(pageBegin, pageEnd)"
       style="width: 100%; margin-top: 20px"
       stripe
       v-loading="listLoading"
     >
       <el-table-column type="selection" width="50" align="center" />
-      <el-table-column prop="userID" label="账户编号" align="center" />
-      <el-table-column prop="userName" label="账户名称" align="center" />
-      <el-table-column label="绑定状态" align="center">
+      <el-table-column prop="userID" label="账户编号" align="center" sortable />
+      <el-table-column
+        prop="userName"
+        label="账户名称"
+        align="center"
+        sortable
+      />
+      <el-table-column
+        prop="bindStatus"
+        label="绑定状态"
+        align="center"
+        :filters="[
+          { text: '审核通过', value: 'PASS' },
+          { text: '审核中', value: 'AUDIT' },
+          { text: '审核拒绝', value: 'REFUSE' },
+          { text: '待审核', value: 'WAIT' },
+        ]"
+        :filter-method="filterType"
+        filter-placement="bottom-end"
+      >
         <template slot-scope="scope">
           <el-tag :type="scope.row.bindStatus | tagFilter">
             {{ scope.row.bindStatus | statusFilter }}
@@ -46,11 +76,20 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" width="200" align="center">
-        <router-link :to="'/account/audit/' + '2'" style="margin-right: 10px">
-          <el-button type="primary" icon="el-icon-edit" size="mini"
-            >审核</el-button
+        <template slot-scope="scope">
+          <router-link
+            :to="{
+              path: '/account/audit',
+              query: {
+                enterpriseID: scope.row.enterpriseID,
+                bindStatus: scope.row.bindStatus,
+              },
+            }"
+            style="margin-right: 10px"
           >
-        </router-link>
+            <el-link type="primary" :underline="false">审核</el-link>
+          </router-link>
+        </template>
         <el-button
           type="danger"
           icon="el-icon-delete"
@@ -88,7 +127,7 @@
     </el-dialog>
 
     <!-- 分页 -->
-    <div class="block">
+    <div style="display: flex; justify-content: right">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -114,6 +153,7 @@ export default {
         PASS: "审核通过",
         AUDIT: "审核中",
         REFUSE: "审核拒绝",
+        WAIT: "待审核",
       };
       return statusMap[status];
     },
@@ -122,6 +162,7 @@ export default {
         PASS: "success",
         AUDIT: "primary",
         REFUSE: "danger",
+        WAIT: "info",
       };
       return tagMap[status];
     },
@@ -129,13 +170,18 @@ export default {
 
   data() {
     return {
+      tableData: {},
       bindList: {},
       bindListLength: undefined,
       listLoading: true,
       dialogFormVisible: false,
       formLabelWidth: "120px",
       num: 1,
-      numSize: 3,
+      pageBegin: 0,
+      pageEnd: 0,
+      pageSize: 10,
+      pageNum: 0,
+      searchForm: { userID: "", userName: "" },
     };
   },
 
@@ -145,19 +191,29 @@ export default {
   },
 
   methods: {
-    tableRowClassName({ row, rowIndex }) {
-      if (rowIndex % 4 === 0) {
-        return "success-row";
-      } else if (rowIndex % 2 === 0) {
-        return "warning-row";
-      }
-      return "";
+    handleSearch() {
+      let form = this.searchForm;
+      let tableList = this.bindList;
+      // 筛选后的数据
+      const filterList = tableList.filter((item) => {
+        return Object.values(form).every((key, index) => {
+          return item[Object.keys(form)[index]].includes(key);
+        });
+      });
+      this.tableData = filterList;
     },
+    handleReset() {
+      this.tableData = this.bindList;
+      this.searchForm.userID = "";
+      this.searchForm.userName = "";
+    },
+
     fetchData() {
       this.listLoading = true;
       auditAPI.getBindList().then((response) => {
         this.bindList = response.data.bindList;
         this.bindListLength = this.bindList.length;
+        this.tableData = this.bindList;
         this.listLoading = false;
       });
     },
@@ -182,6 +238,12 @@ export default {
             message: "已取消删除",
           });
         });
+    },
+    formatter(row, column) {
+      return row.address;
+    },
+    filterType(value, row) {
+      return row.bindStatus === value;
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);

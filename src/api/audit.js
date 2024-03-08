@@ -1,36 +1,38 @@
 import request from "@/utils/request";
 
 export default {
+  // 后台没填数据，测不了
   getBindDetail(token, enterpriseID) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/audit/enterpriseBindDetail",
+      url: "/audit/enterpriseBindDetail",
       method: "post",
-      params: {
-        token: "12334252535345",
-        enterpriseID: "12313213",
+      data: {
+        token: token,
+        enterpriseID: enterpriseID,
       },
     });
   },
 
   getBindList() {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/audit/enterpriseBindList",
+      url: "/audit/enterpriseBindList",
       method: "get",
     });
   },
 
   getUserList() {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/audit/userList",
+      url: "/audit/userList",
       method: "get",
     });
   },
 
+  // 未测试，账户权限不够
   submitAuditResult(token, enterpriseIDList, auditStatus, auditOpinion) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/audit/verifyEnterprise",
+      url: "/audit/verifyEnterprise",
       method: "post",
-      params: {
+      data: {
         token: token,
         enterpriseIDList: enterpriseIDList,
         auditStatus: auditStatus,

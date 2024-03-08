@@ -3,19 +3,20 @@ import request from "@/utils/request";
 export default {
   getTradeList(token) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/public/tradeList",
+      url: "/public/tradeList",
       method: "post",
-      params: {
+      data: {
         token: token,
       },
     });
   },
 
+  // 后端填的null，测不了
   getOrder(orderID) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/public/order",
+      url: "/public/order",
       method: "post",
-      params: {
+      data: {
         orderID: orderID,
       },
     });

@@ -1,7 +1,12 @@
 <template>
   <div class="app-container">
     <div class="content-container">
-      <el-form label-width="200px" class="form-table" v-loading="loading">
+      <el-form
+        style="margin-top: 10px"
+        label-width="200px"
+        class="form-table"
+        v-loading="loading"
+      >
         <el-row>
           <el-col :span="6">
             <el-form-item label="企业名：">
@@ -73,8 +78,13 @@
       </el-form>
     </div>
 
-    <div class="content-container">
-      <el-form label-width="200px" class="form-table" v-loading="loading">
+    <div v-if="bindStatus === 'PASS'" class="content-container">
+      <el-form
+        style="margin: 10px 0"
+        label-width="200px"
+        class="form-table"
+        v-loading="loading"
+      >
         <el-row>
           <el-col :span="18">
             <el-form-item label="审核结果：" :required="true">
@@ -84,37 +94,40 @@
           </el-col>
         </el-row>
 
-        <el-row>
-          <el-col :span="18">
+        <el-row v-if="auditStatus === 'REFUSE'">
+          <el-col :span="16">
             <el-form-item label="审核意见：" :required="true">
               <el-input
+                resize="none"
                 type="textarea"
-                :rows="4"
-                placeholder="请输入审核意见"
+                :rows="5"
+                placeholder="请输入驳回此申请的原因"
                 v-model="auditOpinion"
               >
               </el-input>
             </el-form-item>
           </el-col>
         </el-row>
-      </el-form>
 
-      <el-row type="flex" justify="center" style="text-align: center">
-        <el-col :span="6">
-          <router-link :to="'/account/bind/'" style="margin-right: 10px">
+        <el-form-item>
+          <router-link
+            :to="'/account/bind/'"
+            style="margin-right: 30px; float: left"
+          >
             <el-button>返回</el-button>
           </router-link>
-        </el-col>
-        <el-col :span="6">
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-        </el-col>
-      </el-row>
+          <el-button style="float: left" type="primary" @click="handleSubmit"
+            >提交</el-button
+          >
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
 
 <script>
 import auditAPI from "@/api/audit";
+import Cookies from "js-cookie";
 
 export default {
   filters: {
@@ -138,6 +151,7 @@ export default {
   data() {
     return {
       loading: true,
+      userID: "",
       bindDetail: {},
       auditStatus: "",
       auditOpinion: "",
@@ -151,7 +165,11 @@ export default {
 
   methods: {
     fetchData() {
-      auditAPI.getBindDetail("1", "2").then((response) => {
+      let token = Cookies.get("token");
+      this.enterpriseID = this.$route.query.enterpriseID;
+      this.bindStatus = this.$route.query.bindStatus;
+      console.log(this.enterpriseID);
+      auditAPI.getBindDetail(token, this.enterpriseID).then((response) => {
         this.bindDetail = response.data;
         this.loading = false;
       });
@@ -194,23 +212,27 @@ export default {
       }
       this.enterpriseIDList.push(this.bindDetail.enterpriseID);
       console.log(this.enterpriseIDList);
-      auditAPI
-        .submitAuditResult(
-          "1",
-          this.enterpriseIDList,
-          this.auditStatus,
-          this.auditOpinion
-        )
-        .then((response) => {
-          const h = this.$createElement;
 
-          this.$notify({
-            title: "通知",
-            message: h("i", { style: "color: teal" }, response.message),
+      if (this.auditStatus && this.auditOpinion) {
+        let token = Cookies.get("token");
+        auditAPI
+          .submitAuditResult(
+            token,
+            this.enterpriseIDList,
+            this.auditStatus,
+            this.auditOpinion
+          )
+          .then((response) => {
+            const h = this.$createElement;
+
+            this.$notify({
+              title: "通知",
+              message: h("i", { style: "color: teal" }, response.message),
+            });
+
+            this.$router.push("/account/bind");
           });
-
-          this.$router.push("/account/bind");
-        });
+      }
     },
   },
 };
@@ -221,8 +243,8 @@ export default {
   background-color: #ffffff !important;
   padding: 20px 5px;
   margin-bottom: 10px;
-  border-radius: 8px;
-  box-shadow: 0 1px 5px rgb(0, 0, 0.5);
+  border-radius: 5px;
+  box-shadow: 0 1px 5px rgb(0, 0, 0, 0.2);
 }
 
 .el-input.is-disabled /deep/ .el-input__inner {

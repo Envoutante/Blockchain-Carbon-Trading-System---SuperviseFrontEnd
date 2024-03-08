@@ -38,6 +38,12 @@ export const constantRoutes = [
   },
 
   {
+    path: "/register",
+    component: () => import("@/views/register/index"),
+    hidden: true,
+  },
+
+  {
     path: "/404",
     component: () => import("@/views/404"),
     hidden: true,
@@ -50,9 +56,9 @@ export const constantRoutes = [
     children: [
       {
         path: "dashboard",
-        name: "Dashboard",
+        name: "Home",
         component: () => import("@/views/dashboard/index"),
-        meta: { title: "仪表盘", icon: "dashboard" },
+        meta: { title: "首页", icon: "el-icon-s-home" },
       },
     ],
   },
@@ -99,7 +105,7 @@ export const constantRoutes = [
         hidden: true,
       },
       {
-        path: "detail/:orderID",
+        path: "detail",
         name: "tradeDetail",
         component: () => import("@/views/trade/detail"),
         meta: { title: "交易详情" },
@@ -150,7 +156,7 @@ export const constantRoutes = [
         meta: { title: "绑定列表", icon: "el-icon-office-building" },
       },
       {
-        path: "audit/:companyType",
+        path: "audit",
         name: "Audit",
         component: () => import("@/views/account/audit"),
         meta: { title: "绑定详情" },

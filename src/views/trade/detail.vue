@@ -42,9 +42,9 @@
         </template>
         {{
           order.tradeType === "SOLD"
-            ? "购买"
+            ? "收购碳排量"
             : order.tradeType === "SALE"
-            ? "出售"
+            ? "出售碳排量"
             : ""
         }}
       </el-descriptions-item>
@@ -62,9 +62,15 @@
           <i class="el-icon-time"></i>
           时间戳
         </template>
-        {{ dayjs(order.orderTime).format("YYYY[年]-MM[月]-DD[日] HH:mm:ss") }}
+        {{
+          dayjs(parseInt(order.orderTime) * 1000).format(
+            "YYYY[年]-MM[月]-DD[日] HH:mm:ss"
+          )
+        }}
       </el-descriptions-item>
     </el-descriptions>
+
+    <el-empty v-if="!orderID.length" description="暂无相关交易"></el-empty>
   </div>
 </template>
 
@@ -88,15 +94,16 @@ export default {
 
   methods: {
     getOrderID() {
-      this.orderID = this.$route.params.orderID;
-      console.log(this.orderID);
+      // this.orderID = this.$route.params.orderID;
+      this.orderID = this.$route.query.orderID;
+      console.log("打印" + this.orderID);
     },
     getOrderList() {
       this.listLoading = true;
       for (let i = 0; i < this.orderID.length; i++) {
         let order = this.orderID[i];
         tradeAPI.getOrder(order).then((response) => {
-          this.orderList.push(response.data);
+          this.orderList.push(response.data.orderListEnterprise[0]);
         });
       }
       this.listLoading = false;

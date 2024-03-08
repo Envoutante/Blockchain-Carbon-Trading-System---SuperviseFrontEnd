@@ -10,9 +10,9 @@ import request from "@/utils/request";
 
 export function login(userName, userPwd) {
   return request({
-    url: "https://mock.apifox.com/m1/2214773-0-default/auth/superviseLogin",
+    url: "/auth/superviseLogin",
     method: "post",
-    params: {
+    data: {
       userName: userName,
       userPwd: userPwd,
     },
@@ -27,9 +27,9 @@ export function login(userName, userPwd) {
 //   });
 // }
 
-export function logout() {
-  return request({
-    url: "/vue-admin-template/user/logout",
-    method: "post",
-  });
-}
+// export function logout() {
+//   return request({
+//     url: "/vue-admin-template/user/logout",
+//     method: "post",
+//   });
+// }

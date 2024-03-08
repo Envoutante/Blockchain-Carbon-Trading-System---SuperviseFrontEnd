@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" style="background-color: #ffffff">
     <!-- table -->
     <div>
       <div>
@@ -37,46 +37,17 @@
             <div>本年度碳排放量<span> (tCO₂)</span></div>
           </div>
 
-          <div
+          <!-- <div
             style="color: white; margin-left: 50px; width: 350px"
             v-if="submitType == 'create'"
           >
-            <div>
-              <!-- <a-statistic
-                title=""
-                :precision="4"
-                :value="enterpriseRemainEmission - dataSource.sumEmission"
-                :valueStyle="{
-                  fontSize: '42px',
-                  color:
-                    enterpriseRemainEmission - dataSource.sumEmission <= 0
-                      ? 'red'
-                      : 'white',
-                  fontWeight: 'bold',
-                }"
-              /> -->
-            </div>
             <div>
               企业预计剩余碳排放量<span> (tCO₂)</span><br /><span
                 style="font-size: 10px"
                 >（填报的年度碳排放已预扣但未真实扣减，仅供参考，审核通过后实际扣除）</span
               >
             </div>
-          </div>
-          <div style="color: white; margin-left: 50px; width: 350px" v-else>
-            <div>
-              <!-- <a-statistic
-                title=""
-                :precision="4"
-                :value="enterpriseRemainEmission"
-                :valueStyle="{
-                  fontSize: '42px',
-                  color: 'white',
-                  fontWeight: 'bold',
-                }"
-              /> -->
-            </div>
-          </div>
+          </div> -->
         </div>
         <div class="tabelSetOptions" style="width: 100%; text-align: right">
           表格设置：
@@ -122,7 +93,7 @@
         </div>
 
         <!-- 显示表格的地方 -->
-        <a-tabs tab-position="top" default-active-key="0">
+        <a-tabs v-if="haveFlag" tab-position="top" default-active-key="0">
           <a-tab-pane
             v-for="(name, idx) in MainClassName.length"
             :key="`tab_${idx}`"
@@ -139,31 +110,23 @@
             ></emission-submit-table>
           </a-tab-pane>
         </a-tabs>
+
+        <!-- <el-empty v-else description="该企业尚未上传碳核算报告"></el-empty> -->
+        <el-skeleton v-else :rows="10" animated />
+        <router-link v-if="!haveFlag" :to="'/calculate/list'"
+          ><el-button type="primary" style="margin-top: 20px"
+            >返回上一页</el-button
+          ></router-link
+        >
       </div>
 
-      <a-divider />
+      <a-divider v-if="haveFlag" />
 
-      <download />
+      <download v-if="haveFlag" :dataSource="dataSource" ref="download" />
 
-      <a-divider />
+      <a-divider v-if="haveFlag" />
 
-      <template>
-        <!-- <a-affix :offset-bottom="0"> -->
-        <!-- <div
-            style="
-              height: 55px;
-              background-color: #ffffff;
-              border-top: 1px solid rgb(0, 0, 0, 0.2);
-              box-shadow: 0 -1px 10px rgb(0, 0, 0, 0.2);
-              display: flex;
-              align-items: center;
-              justify-content: flex-end;
-            "
-          >
-            <el-button type="primary" style="margin-right: 10px"
-              >点击进行审核</el-button
-            >
-          </div> -->
+      <template v-if="haveFlag">
         <div class="content-container">
           <el-form label-width="200px" class="form-table" v-loading="loading">
             <el-row>
@@ -202,7 +165,6 @@
             </el-col>
           </el-row>
         </div>
-        <!-- </a-affix> -->
       </template>
     </div>
   </div>
@@ -223,6 +185,7 @@ import { Drawer, Button, Tabs, TabPane, Statistic } from "ant-design-vue";
 const Base64 = require("js-base64").Base64;
 
 import calculateAPI from "@/api/calculate.js";
+import Cookies from "js-cookie";
 
 export default {
   name: "emissionSubmit",
@@ -239,6 +202,7 @@ export default {
 
   data() {
     return {
+      haveFlag: false,
       enterpriseID: "",
       taskYear: "",
       dataSource: {
@@ -269,12 +233,25 @@ export default {
   methods: {
     getSourceData() {
       this.taskYear = this.$route.params.year;
+      let taskYearInt = parseInt(this.taskYear);
       this.enterpriseID = this.$route.params.id;
       calculateAPI
-        .getReport(this.taskYear, this.enterpriseID)
+        .getReport(taskYearInt, this.enterpriseID)
         .then((response) => {
-          this.dataSource = response.data.report;
-          this.passSourceData(this.dataSource);
+          if (response.code == 404) {
+            this.$message({
+              message: "该企业尚未填写碳核算报告，请返回！",
+              type: "warning",
+            });
+            this.haveFlag = false;
+          } else {
+            this.dataSource = response.data.report;
+            this.passSourceData(this.dataSource);
+            this.haveFlag = true;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
         });
     },
     passSourceData(submitData, type = "modify") {
@@ -454,25 +431,25 @@ export default {
       } else if (!this.auditStatus && !this.auditOpinion) {
         this.noBoth();
       }
-      this.enterpriseIDList.push(this.bindDetail.enterpriseID);
-      console.log(this.enterpriseIDList);
-      auditAPI
-        .submmitAuditResult(
-          "1",
-          this.enterpriseIDList,
-          this.auditStatus,
-          this.auditOpinion
-        )
-        .then((response) => {
-          const h = this.$createElement;
 
-          this.$notify({
-            title: "通知",
-            message: h("i", { style: "color: teal" }, response.message),
+      if (this.auditStatus && this.auditOpinion) {
+        let token = Cookies.get("token");
+        calculateAPI
+          .submitAuditResult(
+            token,
+            this.enterpriseID,
+            this.auditStatus,
+            this.auditOpinion,
+            this.taskYear
+          )
+          .then((response) => {
+            this.$message({
+              message: response.message,
+              type: "success",
+            });
+            this.$router.push("/calculate/list");
           });
-
-          this.$router.push("/account/bind");
-        });
+      }
     },
   },
 };

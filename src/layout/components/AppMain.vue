@@ -3,6 +3,18 @@
     <transition name="fade-transform" mode="out-in">
       <router-view :key="key" />
     </transition>
+    <div
+      style="
+        margin-top: 20px;
+        height: 70px;
+        background-color: #f7f9fe;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+      "
+    >
+      碳盟链道 · 监管端
+    </div>
   </section>
 </template>
 

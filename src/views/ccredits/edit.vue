@@ -63,6 +63,7 @@
 
 <script>
 import ccreditsAPI from "@/api/ccredits";
+import Cookies from "js-cookie";
 
 export default {
   data() {
@@ -95,14 +96,26 @@ export default {
         });
       }
       if (statusType) {
-        ccreditsAPI
-          .addEmission("1", this.enterpriseIDList, this.emission)
-          .then((response) => {
-            this.$message({
-              message: response.message,
-              type: "success",
+        let token = Cookies.get("token");
+        for (var i = 0; i < this.enterpriseIDList.length; i++) {
+          var enterpriseID = this.enterpriseIDList[i];
+          ccreditsAPI
+            .addEmission(token, enterpriseID, this.emission)
+            .then((response) => {
+              this.$message({
+                message: response.message,
+                type: "success",
+              });
             });
-          });
+        }
+        // ccreditsAPI
+        //   .addEmission(token, this.enterpriseIDList, this.emission)
+        //   .then((response) => {
+        //     this.$message({
+        //       message: response.message,
+        //       type: "success",
+        //     });
+        //   });
       }
       console.log(this.enterpriseIDList);
     },
@@ -155,8 +168,8 @@ h3 {
   background-color: #ffffff !important;
   padding: 20px 20px;
   margin-bottom: 10px;
-  border-radius: 8px;
-  box-shadow: 0 1px 5px rgb(0, 0, 0.5);
+  border-radius: 5px;
+  box-shadow: 0 1px 5px rgb(0, 0, 0, 0.2);
 }
 
 .el-input.is-disabled /deep/ .el-input__inner {

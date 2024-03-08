@@ -2,14 +2,20 @@
   <div class="app-container">
     <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline">
-      <el-form-item label="企业名称">
-        <el-input size="small" placeholder="企业名称" />
+      <el-form-item label="甲方企业">
+        <el-input
+          v-model="searchForm.publishName"
+          size="small"
+          placeholder="请输入甲方企业"
+        />
       </el-form-item>
 
-      <el-form-item label="类型">
-        <el-select size="small" placeholder="请选择" clearable>
-          <el-option value="1" label="CCER" />
-        </el-select>
+      <el-form-item label="交易编号">
+        <el-input
+          v-model="searchForm.tradeID"
+          size="small"
+          placeholder="请输入交易编号"
+        />
       </el-form-item>
 
       <el-form-item>
@@ -17,50 +23,105 @@
           size="small"
           type="primary"
           icon="el-icon-search"
-          @click="fetchData()"
+          @click="handleSearch"
         >
           查询
         </el-button>
+
         <el-button
           size="small"
           type="primary"
           icon="el-icon-refresh-left"
-          @click="resetData()"
+          @click="handleReset"
           >清空</el-button
         >
       </el-form-item>
     </el-form>
 
     <el-table
-      :data="tradeListEnterprise.slice(pageBegin, pageEnd)"
+      :data="tableData.slice(pageBegin, pageEnd)"
       v-loading="listLoading"
       element-loading-text="Loading"
       stripe
       fit
       highlight-current-row
+      :default-sort="{ prop: 'tradeID', order: 'descending' }"
     >
-      <el-table-column prop="tradeID" label="交易编号" align="center" />
-      <el-table-column label="交易状态" align="center">
+      <el-table-column
+        prop="tradeID"
+        label="交易编号"
+        align="center"
+        sortable
+      />
+      <el-table-column
+        prop="tradeStatus"
+        label="交易状态"
+        align="center"
+        :filters="[
+          { text: '已达成', value: 'YES' },
+          { text: '未达成', value: 'NO' },
+        ]"
+        :filter-method="filterStatus"
+        filter-placement="bottom-end"
+      >
         <template slot-scope="scope">
           <span v-if="scope.row.tradeStatus === 'YES'">已达成交易</span>
           <span v-else-if="scope.row.tradeStatus === 'NO'">未达成交易</span>
         </template>
       </el-table-column>
-      <el-table-column prop="tradeType" label="交易类型" align="center">
+      <el-table-column
+        prop="tradeType"
+        label="交易类型"
+        align="center"
+        :filters="[
+          { text: '收购', value: 'SOLD' },
+          { text: '出售', value: 'SALE' },
+        ]"
+        :filter-method="filterType"
+        filter-placement="bottom-end"
+      >
         <template slot-scope="scope">
-          <span v-if="scope.row.tradeType === 'SOLD'">购买</span>
-          <span v-else-if="scope.row.tradeType === 'SALE'">出售</span>
+          <span v-if="scope.row.tradeType === 'SOLD'">
+            <el-tag effect="dark" type="success">收购碳排量</el-tag></span
+          >
+          <span v-else-if="scope.row.tradeType === 'SALE'"
+            ><el-tag effect="dark" type="danger">出售碳排量</el-tag></span
+          >
         </template>
       </el-table-column>
-      <el-table-column prop="emission" label="交易总量" align="center" />
-      <el-table-column prop="perEmission" label="交易单价" align="center" />
-      <el-table-column prop="publishName" label="甲方企业" align="center" />
+      <el-table-column
+        prop="emission"
+        label="交易总量(tCO₂)"
+        align="center"
+        sortable
+      />
+      <el-table-column
+        prop="perEmission"
+        label="交易单价(碳币)"
+        align="center"
+        sortable
+      />
+      <el-table-column
+        prop="publishName"
+        label="甲方企业"
+        align="center"
+        sortable
+      />
       <!-- <el-table-column prop="orderID" label="订单编号" align="center" /> -->
       <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
-          <router-link
+          <!-- {path:'/test',query: { userId: 123,userName:'xia' }} -->
+          <!-- <router-link
             :to="'/trade/detail/' + scope.row.orderID"
             style="margin-right: 10px"
+          >
+            <el-button icon="el-icon-document-copy" size="mini">详情</el-button>
+          </router-link> -->
+          <router-link
+            :to="{
+              path: '/trade/detail',
+              query: { orderID: scope.row.orderID },
+            }"
           >
             <el-button icon="el-icon-document-copy" size="mini">详情</el-button>
           </router-link>
@@ -69,7 +130,7 @@
     </el-table>
 
     <!-- 分页 -->
-    <div class="block">
+    <div style="display: flex; justify-content: right">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -87,6 +148,7 @@
 
 <script>
 import tradeAPI from "@/api/trade";
+import Cookie from "js-cookie";
 
 export default {
   filters: {
@@ -102,6 +164,7 @@ export default {
   },
   data() {
     return {
+      tableData: [],
       tradeListEnterprise: [],
       tradeListEnterpriseLength: undefined,
       listLoading: true,
@@ -112,6 +175,7 @@ export default {
       pageEnd: 0,
       pageSize: 10,
       pageNum: 0,
+      searchForm: { tradeID: "", publishName: "" },
     };
   },
   created() {
@@ -119,12 +183,30 @@ export default {
     this.pageEnd = this.pageSize;
   },
   methods: {
+    handleSearch() {
+      let form = this.searchForm;
+      let tableList = this.tradeListEnterprise;
+      // 筛选后的数据
+      const filterList = tableList.filter((item) => {
+        return Object.values(form).every((key, index) => {
+          return item[Object.keys(form)[index]].includes(key);
+        });
+      });
+      this.tableData = filterList;
+    },
+    handleReset() {
+      this.tableData = this.tradeListEnterprise;
+      this.searchForm.tradeID = "";
+      this.searchForm.publishName = "";
+    },
+
     fetchData() {
       this.listLoading = true;
-      tradeAPI.getTradeList("123").then((response) => {
+      let token = Cookie.get("token");
+      tradeAPI.getTradeList(token).then((response) => {
         this.tradeListEnterprise = response.data.tradeListEnterprise;
-        console.log("内容为：" + response);
         this.tradeListEnterpriseLength = this.tradeListEnterprise.length;
+        this.tableData = this.tradeListEnterprise;
         this.listLoading = false;
       });
     },
@@ -146,6 +228,15 @@ export default {
             message: "已取消删除",
           });
         });
+    },
+    formatter(row, column) {
+      return row.address;
+    },
+    filterStatus(value, row) {
+      return row.tradeStatus === value;
+    },
+    filterType(value, row) {
+      return row.tradeType === value;
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);

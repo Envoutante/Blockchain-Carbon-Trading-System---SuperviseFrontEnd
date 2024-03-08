@@ -1,17 +1,44 @@
 <template>
   <div style="margin: 0 0 30px 0">
-    <a-card hoverable style="width: 240px" @click="previewPDF">
-      <template #cover>
-        <div style="display: flex; justify-content: center; padding-top: 20px">
-          <img alt="example" src="@/assets/pdf.png" style="width: 50%" />
-        </div>
-      </template>
-      <a-card-meta title="企业数据来源文件">
-        <template #description
-          >数据来源文件包括温室气体排放报告、监测报告和第三方验证报告。
+    <div>
+      <a-card
+        hoverable
+        style="width: 240px; float: left; height: 300px; margin: 0 20px 30px 0"
+        @click="previewPDF(dataSource.reportPDF)"
+      >
+        <template #cover>
+          <div
+            style="display: flex; justify-content: center; padding-top: 20px"
+          >
+            <img alt="example" src="@/assets/pdf.png" style="width: 50%" />
+          </div>
         </template>
-      </a-card-meta>
-    </a-card>
+        <a-card-meta title="文件1：企业碳排放报告">
+          <template #description
+            >碳排放报告文件是记录和统计国家或组织在一定时期内二氧化碳等温室气体排放情况的官方文档。</template
+          >
+        </a-card-meta>
+      </a-card>
+
+      <a-card
+        hoverable
+        style="width: 240px; float: left; height: 300px; margin: 0 0 30px 0"
+        @click="previewPDF(dataSource.dataSourcePDF)"
+      >
+        <template #cover>
+          <div
+            style="display: flex; justify-content: center; padding-top: 20px"
+          >
+            <img alt="example" src="@/assets/pdf.png" style="width: 50%" />
+          </div>
+        </template>
+        <a-card-meta title="文件2：企业数据来源文件">
+          <template #description
+            >数据来源文件包括温室气体排放报告、监测报告和第三方验证报告。
+          </template>
+        </a-card-meta>
+      </a-card>
+    </div>
 
     <el-dialog :visible.sync="previewDialog">
       <template>
@@ -83,12 +110,19 @@
             @error="pdfError($event)"
             @link-clicked="page = $event"
           ></pdf>
+
           <div style="text-align: center" class="page">
             {{ pageNum }}/{{ pageTotalNum }}
           </div>
         </div>
       </template>
     </el-dialog>
+
+    <!-- <iframe
+      :src="'http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf'"
+      width="100%"
+      height="1000px"
+    ></iframe> -->
   </div>
 </template>
 
@@ -101,11 +135,18 @@ export default {
     pdf: PDF,
   },
 
+  props: {
+    dataSource: {
+      type: Object,
+    },
+  },
+
   data() {
     return {
       previewDialog: false,
-      url: "http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf",
-      name: "莫某",
+      // url: "http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf",
+      url: "",
+      name: "",
       pageNum: 1,
       pageTotalNum: 1,
       pageRotate: 0,
@@ -117,9 +158,10 @@ export default {
 
   methods: {
     // 预览 PDF
-    previewPDF(row, index) {
+    previewPDF(row, index, pdfURL) {
       this.previewDialog = true;
-      console.log("", row, index);
+      this.url = pdfURL ? pdfURL : this.url;
+      console.log("PDF：", row, index, this.url);
     },
     // 上一页函数，
     prePage() {
@@ -161,14 +203,16 @@ export default {
     pdfDownload() {
       const that = this;
       var oReq = new XMLHttpRequest();
-      var URL = this.url;
+      //http://8.137.108.102:8080/download/QmUbz22gMWNJbMMXyFzTENgDfSzXbVY7m75F1Q95nfKcES
+      var URL =
+        "http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf";
       oReq.open("GET", URL, true);
       oReq.responseType = "blob";
       oReq.onload = function () {
         var file = new Blob([oReq.response], {
           type: "blob",
         });
-        FileSaver.saveAs(file, that.name); // that.name为文件名
+        FileSaver.saveAs(file, "1.pdf"); // that.name为文件名
       };
       oReq.send();
     },

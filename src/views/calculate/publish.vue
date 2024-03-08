@@ -22,7 +22,7 @@
         </p>
         <div
           v-if="data.isSelected ? 'is-selected' : ''"
-          style="text-align: center; margin-top: 30px"
+          style="text-align: right; margin-top: 30px"
         >
           <a @click="taskFormVisible = true">点击确认</a>
         </div>
@@ -92,6 +92,7 @@
 <script>
 import dayjs from "dayjs";
 import calculateAPI from "@/api/calculate";
+import Cookies from "js-cookie";
 
 export default {
   data() {
@@ -133,16 +134,21 @@ export default {
     },
 
     taskPublish() {
-      let token = "123";
+      let token = Cookies.get("token");
       this.taskYear = new Date().getFullYear();
-      let beginTime = dayjs(this.taskBeginTime).valueOf();
-      let endTime = dayjs(this.taskEndTime).valueOf();
+      // let beginTime = dayjs(this.taskBeginTime).valueOf();
+      // let endTime = dayjs(this.taskEndTime).valueOf();
+      // let beginTime = dayjs(this.taskBeginTime).valueOf().toString();
+      var milliseconds = dayjs(this.taskBeginTime).valueOf() / 1000;
+      var beginTime = milliseconds.toString(); // 转换为字符串
+      var milliseconds = dayjs(this.taskEndTime).valueOf() / 1000;
+      var endTime = milliseconds.toString(); // 转换为字符串
       calculateAPI
         .taskPublish(
           token,
           this.taskYear,
-          beginTime / 1000,
-          endTime / 1000,
+          beginTime,
+          endTime,
           this.taskDescription
         )
         .then((response) => {

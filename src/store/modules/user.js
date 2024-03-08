@@ -1,4 +1,5 @@
-import { login, logout, getInfo } from "@/api/user";
+// import { login, logout, getInfo } from "@/api/user";
+import { login } from "@/api/user";
 import { getToken, setToken, removeToken } from "@/utils/auth";
 import { resetRouter } from "@/router";
 
@@ -30,14 +31,13 @@ const mutations = {
 const actions = {
   // user login
   login({ commit }, userInfo) {
-    const { username, password } = userInfo;
+    const { userName, userPwd } = userInfo;
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password })
+      login(userName, userPwd)
         .then((response) => {
           // const { data } = response;
           // commit("SET_TOKEN", data.token);
           // setToken(data.token);
-          console.log(response.data.token);
           // const { data } = response.data;
           commit("SET_TOKEN", response.data.token);
           setToken(response.data.token);
@@ -73,25 +73,25 @@ const actions = {
   // },
 
   // user logout
-  logout({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      logout(state.token)
-        .then(() => {
-          removeToken(); // must remove  token  first
-          resetRouter();
-          commit("RESET_STATE");
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  },
+  // logout({ commit, state }) {
+  //   return new Promise((resolve, reject) => {
+  //     logout(state.token)
+  //       .then(() => {
+  //         removeToken(); // must remove token first
+  //         resetRouter();
+  //         commit("RESET_STATE");
+  //         resolve();
+  //       })
+  //       .catch((error) => {
+  //         reject(error);
+  //       });
+  //   });
+  // },
 
   // remove token
   resetToken({ commit }) {
     return new Promise((resolve) => {
-      removeToken(); // must remove  token  first
+      removeToken(); // must remove token first
       commit("RESET_STATE");
       resolve();
     });

@@ -3,16 +3,18 @@ import request from "@/utils/request";
 export default {
   getReportList() {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/caculate/reportList",
+      url: "/caculate/reportList",
       method: "get",
     });
   },
 
+  // 测试失败，类型不匹配
+  // 权限不够
   taskPublish(token, taskYear, taskBeginTime, taskEndTime, taskDescription) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/calculate/taskPublish",
+      url: "/calculate/taskPublish",
       method: "post",
-      params: {
+      data: {
         token: token,
         taskYear: taskYear,
         taskBeginTime: taskBeginTime,
@@ -24,22 +26,26 @@ export default {
 
   getReport(taskYear, enterpriseID) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/public/enterpriseReport",
+      url: "/public/enterpriseReport",
       method: "post",
-      params: {
+      data: {
         taskYear: taskYear,
         enterpriseID: enterpriseID,
       },
     });
   },
 
-  submitAuditResult(taskYear, enterpriseID) {
+  // 新增
+  submitAuditResult(token, enterpriseID, auditStatus, auditOpinion, taskYear) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/public/enterpriseReport",
+      url: "/calculate/verifyReport",
       method: "post",
-      params: {
-        taskYear: taskYear,
+      data: {
+        token: token,
         enterpriseID: enterpriseID,
+        auditStatus: auditStatus,
+        auditOpinion: auditOpinion,
+        taskYear: taskYear,
       },
     });
   },

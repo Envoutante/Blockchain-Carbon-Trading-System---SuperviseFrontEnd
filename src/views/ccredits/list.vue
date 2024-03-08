@@ -2,8 +2,20 @@
   <div class="app-container">
     <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline">
-      <el-form-item label="企业名称">
-        <el-input size="small" placeholder="企业名称" />
+      <el-form-item label="企业名">
+        <el-input
+          v-model="searchForm.enterpriseName"
+          size="small"
+          placeholder="请输入企业名"
+        />
+      </el-form-item>
+
+      <el-form-item label="企业组织机构代码">
+        <el-input
+          v-model="searchForm.enterpriseID"
+          size="small"
+          placeholder="请输入企业组织机构代码"
+        />
       </el-form-item>
 
       <el-form-item>
@@ -11,15 +23,16 @@
           size="small"
           type="primary"
           icon="el-icon-search"
-          @click="fetchData()"
+          @click="handleSearch"
         >
           查询
         </el-button>
+
         <el-button
           size="small"
           type="primary"
           icon="el-icon-refresh-left"
-          @click="resetData()"
+          @click="handleReset"
           >清空</el-button
         >
       </el-form-item>
@@ -36,18 +49,12 @@
             >批量添加</el-button
           >
         </router-link>
-        <el-input-number
-          v-model="newEmission"
-          size="small"
-          :min="1"
-          :max="10"
-          style="margin-right: 10px"
-        />
+
         <el-button
           size="small"
           type="primary"
           icon="el-icon-edit"
-          @click="batchEdit"
+          @click="batchEditVisible = true"
           >批量编辑</el-button
         >
 
@@ -61,8 +68,29 @@
       </el-form-item>
     </el-form>
 
-    <el-table
-      :data="emissionList.slice(pageBegin, pageEnd)"
+    <!-- 批量编辑的对话框 -->
+    <el-dialog
+      title="批量编辑碳配额"
+      :visible.sync="batchEditVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <span style="display: flex; justify-content: center">
+        <el-input-number
+          v-model="newEmission"
+          size="medium"
+          :min="0"
+          :max="2000"
+          style="margin: auto"
+      /></span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="batchEditVisible = false">取 消</el-button>
+        <el-button type="primary" @click="batchEdit">提 交</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- <el-table
+      :data="tableData.slice(pageBegin, pageEnd)"
       style="width: 100%"
       stripe
       v-loading="listLoading"
@@ -73,25 +101,65 @@
       "
       :reserve-selection="true"
       @selection-change="handleSelect"
+      :default-sort="{ prop: 'enterpriseID', order: 'descending' }"
+    > -->
+    <el-table
+      :data="tableData.slice(pageBegin, pageEnd)"
+      style="width: 100%"
+      stripe
+      v-loading="listLoading"
+      :row-key="(val) => val.enterpriseID"
+      @selection-change="(val) => (selectedRow = val)"
+      :default-sort="{ prop: 'enterpriseID', order: 'descending' }"
     >
-      <el-table-column type="selection" width="50"></el-table-column>
+      <el-table-column
+        :reserve-selection="true"
+        type="selection"
+        width="50"
+      ></el-table-column>
       <el-table-column
         prop="enterpriseID"
         label="企业组织机构代码"
         align="center"
+        sortable
       />
-      <el-table-column prop="enterpriseName" label="企业名" align="center" />
+      <el-table-column
+        prop="enterpriseName"
+        label="企业名"
+        align="center"
+        sortable
+      />
       <el-table-column
         prop="enterpriseClass"
         label="企业所处行业"
         align="center"
-      />
+        :filters="[
+          { text: '发电企业', value: '1' },
+          { text: '电网企业', value: '2' },
+          { text: '钢铁生产企业', value: '3' },
+          { text: '化工生产企业', value: '4' },
+          { text: '电解铝生产企业', value: '5' },
+          { text: '镁冶炼企业', value: '6' },
+          { text: '平板玻璃生产企业', value: '7' },
+          { text: '水泥生产企业', value: '8' },
+          { text: '陶瓷生产企业', value: '9' },
+          { text: '民航企业', value: '10' },
+        ]"
+        :filter-method="filterCompany"
+        filter-placement="bottom-end"
+        ><template slot-scope="scope">
+          <el-tag effect="plain" type="success">
+            {{ scope.row.enterpriseClass | companyFilter }}
+          </el-tag>
+        </template></el-table-column
+      >
       <el-table-column
         prop="remainEmission"
         label="剩余碳排放量"
         align="center"
+        sortable
       />
-      <el-table-column prop="coCoin" label="碳币余额" align="center" />
+      <el-table-column prop="coCoin" label="碳币余额" align="center" sortable />
       <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
           <el-button
@@ -115,7 +183,7 @@
     <!-- 单一编辑框 -->
     <el-dialog title="编辑碳配额" :visible.sync="dialogFormVisible">
       <el-form :model="emissionItem">
-        <el-form-item label="组织代码" :label-width="formLabelWidth">
+        <el-form-item label="企业组织机构代码" :label-width="formLabelWidth">
           <el-input
             id="myText"
             :value="emissionItem.enterpriseID"
@@ -123,7 +191,7 @@
             disabled
           ></el-input>
         </el-form-item>
-        <el-form-item label="企业名称" :label-width="formLabelWidth">
+        <el-form-item label="企业名" :label-width="formLabelWidth">
           <el-input
             id="myText"
             :value="emissionItem.enterpriseName"
@@ -131,10 +199,10 @@
             disabled
           ></el-input>
         </el-form-item>
-        <el-form-item label="行业类型" :label-width="formLabelWidth">
+        <el-form-item label="企业所处行业" :label-width="formLabelWidth">
           <el-input
             id="myText"
-            :value="emissionItem.enterpriseClass"
+            :value="emissionItem.enterpriseClass | companyFilter"
             autocomplete="off"
             disabled
           ></el-input>
@@ -147,20 +215,18 @@
             disabled
           ></el-input>
         </el-form-item>
-        <el-form-item label="碳币余额" :label-width="formLabelWidth">
-          <el-input-number v-model="newCoCoin" :min="1" :max="10" />
+        <el-form-item label="碳币总量" :label-width="formLabelWidth">
+          <el-input-number v-model="newCoCoin" :min="1" :max="2000" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="updateCcredits">确 定</el-button>
       </div>
     </el-dialog>
 
     <!-- 分页 -->
-    <div class="block">
+    <div style="display: flex; justify-content: right">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -178,10 +244,31 @@
 
 <script>
 import ccreditsAPI from "@/api/ccredits";
+import Cookies from "js-cookie";
 
 export default {
+  filters: {
+    companyFilter(type) {
+      const companyMap = {
+        1: "发电企业",
+        2: "电网企业",
+        3: "钢铁生产企业",
+        4: "化工生产企业",
+        5: "电解铝生产企业",
+        6: "镁冶炼企业",
+        7: "平板玻璃生产企业",
+        8: "水泥生产企业",
+        9: "陶瓷生产企业",
+        10: "民航企业",
+      };
+      return companyMap[type];
+    },
+  },
+
   data() {
     return {
+      selectedRow: [],
+      tableData: {},
       emissionList: {},
       emissionListLength: undefined,
       emissionItem: {
@@ -197,13 +284,14 @@ export default {
       listLoading: true,
       dialogFormVisible: false,
       batchEditVisible: false,
-      formLabelWidth: "120px",
+      formLabelWidth: "200px",
       num: 1,
       pageBegin: 0,
       pageEnd: 0,
       pageSize: 10,
       pageNum: 0,
       multipleSelection: [],
+      searchForm: { enterpriseID: "", enterpriseName: "" },
     };
   },
 
@@ -213,48 +301,68 @@ export default {
   },
 
   methods: {
-    tableRowClassName({ row, rowIndex }) {
-      if (rowIndex % 4 === 0) {
-        return "blue-row";
-      } else if (rowIndex % 2 === 0) {
-        return "blue-row";
-      }
-      return "";
+    handleSearch() {
+      let form = this.searchForm;
+      let tableList = this.emissionList;
+      // 筛选后的数据
+      const filterList = tableList.filter((item) => {
+        return Object.values(form).every((key, index) => {
+          return item[Object.keys(form)[index]].includes(key);
+        });
+      });
+      this.tableData = filterList;
     },
+
+    handleReset() {
+      this.tableData = this.emissionList;
+      this.searchForm.enterpriseID = "";
+      this.searchForm.enterpriseName = "";
+    },
+
     fetchData() {
       this.listLoading = true;
       ccreditsAPI.getEmissionList().then((response) => {
         this.emissionList = response.data.emissionList;
         this.emissionListLength = this.emissionList.length;
+        this.tableData = this.emissionList;
         this.listLoading = false;
       });
     },
+
+    // 点击编辑按钮
     editCcredits(emissionItem) {
       this.dialogFormVisible = true;
       this.emissionItem = emissionItem;
-      this.newCoCoin = emissionItem.coCoin;
-      console.log(id);
+      this.newCoCoin = emissionItem.remainEmission + emissionItem.coCoin;
+      console.log("打印：" + this.emissionItem.enterpriseID);
     },
-    // 处理多选
-    handleSelect(val) {
-      this.multipleSelection = val;
-      this.enterpriseIDList = [];
-      // 将选中行的id进行循环遍历存入自定义的ids数组中
-      this.multipleSelection.forEach((row) => {
-        this.enterpriseIDList.push(row.enterpriseID);
-      });
-      console.log(this.enterpriseIDList);
+
+    // 点击提交按钮
+    updateCcredits() {
+      let token = Cookies.get("token");
+      ccreditsAPI
+        .addEmission(token, this.emissionItem.enterpriseID, this.newCoCoin)
+        .then((response) => {
+          this.$message({
+            message: "碳配额编辑成功！",
+            type: "success",
+          });
+          this.dialogFormVisible = false;
+          this.fetchData();
+        });
     },
+
     batchEdit() {
-      console.log(this.enterpriseIDList);
+      console.log(this.selectedRow);
       let statusType = true;
-      if (this.enterpriseIDList.length == 0) {
+      if (this.selectedRow.length == 0) {
         statusType = false;
         this.$message({
           type: "error",
-          message: "请选择需要编辑的企业",
+          message: "请选择需要编辑的企业！",
         });
       }
+
       if (statusType) {
         this.$confirm("此操作批量编辑碳配额，是否继续?", "提示", {
           confirmButtonText: "确定",
@@ -262,13 +370,19 @@ export default {
           type: "warning",
         })
           .then(() => {
+            this.selectedRow.forEach((row) => {
+              this.enterpriseIDList.push(row.enterpriseID);
+            });
+
+            let token = Cookies.get("token");
             ccreditsAPI
-              .addEmission("1", this.enterpriseIDList, this.newEmission)
+              .addEmission(token, this.enterpriseIDList, this.newEmission)
               .then((response) => {
                 this.$message({
                   type: "success",
                   message: "批量编辑成功",
                 });
+                this.fetchData();
               });
           })
           .catch(() => {
@@ -279,6 +393,7 @@ export default {
           });
       }
     },
+
     warning() {
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -298,6 +413,14 @@ export default {
           });
         });
     },
+
+    formatter(row, column) {
+      return row.address;
+    },
+    filterCompany(value, row) {
+      return row.enterpriseClass === value;
+    },
+
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.pageSize = val;

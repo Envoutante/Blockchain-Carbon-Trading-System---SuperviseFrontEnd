@@ -6,7 +6,7 @@ function resolve(dir) {
   return path.join(__dirname, dir);
 }
 
-const name = defaultSettings.title || "vue Admin Template"; // page title
+const name = defaultSettings.title || "碳盟链道"; // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -36,8 +36,27 @@ module.exports = {
       warnings: false,
       errors: true,
     },
-    before: require("./mock/mock-server.js"),
+    // before: require("./mock/mock-server.js"),
+    // proxy: {
+    //   [process.env.VUE_APP_BASE_API]: {
+    //     target: process.env.VUE_APP_BASE_API,
+    //     changeOrigin: true, // 配置跨域
+    //     pathRewrite: {
+    //       ["^" + process.env.VUE_APP_BASE_API]: "",
+    //     },
+    //   },
+    // },
+    proxy: {
+      "/api": {
+        target: process.env.VUE_APP_BASE_API,
+        changeOrigin: true, // 配置跨域
+        pathRewrite: {
+          "^/api": "",
+        },
+      },
+    },
   },
+
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
     // it can be accessed in index.html to inject the correct title.

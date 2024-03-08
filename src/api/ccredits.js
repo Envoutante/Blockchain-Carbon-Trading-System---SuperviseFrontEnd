@@ -3,18 +3,20 @@ import request from "@/utils/request";
 export default {
   getEmissionList() {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/setting/emissionList",
+      url: "/setting/emissionList",
       method: "get",
     });
   },
 
-  addEmission(token, enterpriseIDList, emission) {
+  // 测试失败，类型不匹配
+  // 现在是权限不够了
+  addEmission(token, enterpriseID, emission) {
     return request({
-      url: "https://mock.apifox.com/m1/2214773-0-default/setting/emissionSet",
+      url: "/setting/emissionSet",
       method: "post",
-      params: {
+      data: {
         token: token,
-        enterpriseIDList: enterpriseIDList,
+        enterpriseID: enterpriseID,
         emission: emission,
       },
     });
