@@ -58,7 +58,7 @@ export const constantRoutes = [
         path: "dashboard",
         name: "Home",
         component: () => import("@/views/dashboard/index"),
-        meta: { title: "首页", icon: "el-icon-s-home" },
+        meta: { title: "工作台", icon: "el-icon-house" },
       },
     ],
   },
@@ -67,19 +67,19 @@ export const constantRoutes = [
     path: "/calculate",
     component: Layout,
     redirect: "/calculate/list",
-    meta: { title: "企业碳核算", icon: "el-icon-s-check" },
+    meta: { title: "企业碳核算", icon: "el-icon-coordinate" },
     children: [
       {
         path: "publish",
         name: "publishTask",
         component: () => import("@/views/calculate/publish"),
-        meta: { title: "任务发布", icon: "el-icon-thumb" },
+        meta: { title: "任务发布" },
       },
       {
         path: "list",
         name: "calculateList",
         component: () => import("@/views/calculate/list"),
-        meta: { title: "核算列表", icon: "el-icon-files" },
+        meta: { title: "核算列表" },
       },
       {
         path: "detail/:year/:id",
@@ -95,7 +95,7 @@ export const constantRoutes = [
     path: "/trade",
     component: Layout,
     redirect: "/trade/list",
-    meta: { title: "企业碳交易", icon: "el-icon-s-finance" },
+    meta: { title: "企业碳交易", icon: "el-icon-bank-card" },
     children: [
       {
         path: "list",
@@ -118,7 +118,7 @@ export const constantRoutes = [
     path: "/ccredits",
     component: Layout,
     redirect: "/ccredits/list",
-    meta: { title: "企业碳配额", icon: "form" },
+    meta: { title: "企业碳配额", icon: "el-icon-document" },
     children: [
       {
         path: "list",
@@ -141,19 +141,19 @@ export const constantRoutes = [
     path: "/account",
     component: Layout,
     redirect: "/account/list",
-    meta: { title: "平台账户管理", icon: "el-icon-s-tools" },
+    meta: { title: "账户管理区", icon: "el-icon-set-up" },
     children: [
       {
         path: "list",
         name: "accountList",
         component: () => import("@/views/account/list"),
-        meta: { title: "账户列表", icon: "el-icon-tickets" },
+        meta: { title: "账户列表" },
       },
       {
         path: "bind",
         name: "Bind",
         component: () => import("@/views/account/bind"),
-        meta: { title: "绑定列表", icon: "el-icon-office-building" },
+        meta: { title: "绑定列表" },
       },
       {
         path: "audit",
@@ -170,8 +170,8 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: "https://panjiachen.github.io/vue-element-admin-site/#/",
-        meta: { title: "External Link", icon: "link" },
+        path: "http://8.137.108.102:8081/#/login",
+        meta: { title: "外部链接", icon: "el-icon-position" },
       },
     ],
   },

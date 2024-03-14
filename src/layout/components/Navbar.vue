@@ -27,9 +27,9 @@
               > -->
             </el-dropdown-menu>
           </el-dropdown>
-          <span style="color: #ffffff; margin-left: 10px; font-size: 15px"
-            >数据审核员</span
-          >
+          <span style="color: #ffffff; margin-left: 10px; font-size: 15px">{{
+            userName
+          }}</span>
         </div>
       </div>
     </div>
@@ -47,16 +47,28 @@ export default {
     Breadcrumb,
     Hamburger,
   },
+
   computed: {
     ...mapGetters(["sidebar", "avatar"]),
   },
+
   data() {
     return {
       language: 1,
       userType: 1,
+      userName: "",
     };
   },
+
+  created() {
+    this.fetchData();
+  },
+
   methods: {
+    fetchData() {
+      this.userName = Cookies.get("userName");
+    },
+
     toggleSideBar() {
       this.$store.dispatch("app/toggleSideBar");
     },
@@ -80,6 +92,8 @@ export default {
           setTimeout(() => {
             // 最重要的就是这个,删除cookies
             Cookies.remove("token");
+            Cookies.remove("userName");
+            Cookies.remove("role");
             location.reload(); // 不能省，强制跳到登陆页
             this.$router.push(`/login`);
           }, 1000);

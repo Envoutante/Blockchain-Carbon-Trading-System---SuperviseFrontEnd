@@ -77,27 +77,8 @@
             <div class="top">
               <div class="header" style="padding-left: 50px">
                 <a href="/">
-                  <!-- <img src="~@/assets/logo.svg" class="logo" alt="logo" /> -->
+                  <img src="@/assets/logo.png" class="logo" alt="logo" />
                   <span class="title">碳盟链道</span>
-                  <!-- 差图片 -->
-                  <!-- <img
-                    class="logo"
-                    v-if="this.$store.state.app.lang.includes('zh')"
-                    src="@/assets/header/EnterpriseSideIndication.png"
-                    style="
-                      width: auto;
-                      transform: scale(0.85) translateY(-20px);
-                    "
-                  />
-                  <img
-                    class="logo"
-                    v-else
-                    src="@/assets/header/EnterpriseSideIndication_EN.png"
-                    style="
-                      width: auto;
-                      transform: scale(0.65) translateY(-25px);
-                    "
-                  /> -->
                   <img
                     class="logo"
                     src="@/assets/sub_logo.png"
@@ -121,7 +102,7 @@
                 auto-complete="on"
                 label-width="80px"
               >
-                <el-form-item>
+                <el-form-item prop="userName">
                   <el-input
                     style="width: 350px"
                     prefix-icon="el-icon-user"
@@ -129,12 +110,12 @@
                     v-model="loginForm.userName"
                   ></el-input>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item prop="userPwd">
                   <el-input
                     style="width: 350px"
                     show-password
                     prefix-icon="el-icon-lock"
-                    placeholder="请输入密码"
+                    placeholder="请输入账户密码"
                     v-model="loginForm.userPwd"
                   ></el-input>
                 </el-form-item>
@@ -229,21 +210,24 @@ import { validUsername } from "@/utils/validate";
 
 export default {
   name: "Login",
+
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error("Please enter the correct user name"));
-      } else {
-        callback();
-      }
-    };
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error("The password can not be less than 6 digits"));
-      } else {
-        callback();
-      }
-    };
+    // const validateUsername = (rule, value, callback) => {
+    //   if (!validUsername(value)) {
+    //     callback(new Error("Please enter the correct user name"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
+
+    // const validatePassword = (rule, value, callback) => {
+    //   if (value.length < 6) {
+    //     callback(new Error("The password can not be less than 6 digits"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
+
     return {
       loginForm: {
         // userName: "cstring",
@@ -251,14 +235,26 @@ export default {
         userName: this.$route.query.userName,
         userPwd: this.$route.query.userPwd,
       },
+
       loginRules: {
         userName: [
-          { required: true, trigger: "blur", validator: validateUsername },
+          {
+            required: true,
+            message: "请输入账户名",
+            trigger: "blur",
+            // validator: validateUsername,
+          },
         ],
         userPwd: [
-          { required: true, trigger: "blur", validator: validatePassword },
+          {
+            required: true,
+            message: "请输入账户密码",
+            trigger: "blur",
+            // validator: validatePassword,
+          },
         ],
       },
+
       loading: false,
       passwordType: "password",
       redirect: undefined,
@@ -266,6 +262,7 @@ export default {
       rememberCheck: false,
     };
   },
+
   watch: {
     $route: {
       handler: function (route) {
@@ -274,6 +271,7 @@ export default {
       immediate: true,
     },
   },
+
   methods: {
     showPwd() {
       if (this.passwordType === "password") {
@@ -285,6 +283,7 @@ export default {
         this.$refs.password.focus();
       });
     },
+
     handleLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
@@ -303,7 +302,9 @@ export default {
               this.loading = false;
             });
         } else {
-          console.log("error submit!!");
+          this.$message({
+            message: "请完成登录信息填写！",
+          });
           return false;
         }
       });

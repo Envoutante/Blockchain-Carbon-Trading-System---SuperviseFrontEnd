@@ -1,147 +1,161 @@
 <template>
   <div class="app-container">
-    <!--查询表单-->
-    <el-form :inline="true" class="demo-form-inline">
-      <el-form-item label="甲方企业">
-        <el-input
-          v-model="searchForm.publishName"
-          size="small"
-          placeholder="请输入甲方企业"
+    <div v-if="parseInt(role) === 1">
+      <el-result
+        icon="error"
+        title="警告提示"
+        subTitle="您没有访问本页面的权限"
+      />
+    </div>
+
+    <div v-else>
+      <!--查询表单-->
+      <el-form :inline="true" class="demo-form-inline">
+        <el-form-item label="甲方企业">
+          <el-input
+            v-model="searchForm.publishName"
+            size="small"
+            placeholder="请输入甲方企业"
+          />
+        </el-form-item>
+
+        <el-form-item label="交易编号">
+          <el-input
+            v-model="searchForm.tradeID"
+            size="small"
+            placeholder="请输入交易编号"
+          />
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            size="small"
+            type="primary"
+            icon="el-icon-search"
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
+
+          <el-button
+            size="small"
+            type="primary"
+            icon="el-icon-refresh-left"
+            @click="handleReset"
+            >清空</el-button
+          >
+        </el-form-item>
+      </el-form>
+
+      <el-table
+        :data="tableData.slice(pageBegin, pageEnd)"
+        v-loading="listLoading"
+        element-loading-text="Loading"
+        stripe
+        fit
+        highlight-current-row
+        :default-sort="{ prop: 'tradeID', order: 'descending' }"
+      >
+        <el-table-column
+          prop="tradeID"
+          label="交易编号"
+          align="center"
+          sortable
         />
-      </el-form-item>
-
-      <el-form-item label="交易编号">
-        <el-input
-          v-model="searchForm.tradeID"
-          size="small"
-          placeholder="请输入交易编号"
+        <el-table-column
+          prop="tradeStatus"
+          label="交易状态"
+          align="center"
+          :filters="[
+            { text: '已达成', value: 'YES' },
+            { text: '未达成', value: 'NO' },
+          ]"
+          :filter-method="filterStatus"
+          filter-placement="bottom-end"
+        >
+          <template slot-scope="scope">
+            <span v-if="scope.row.tradeStatus === 'YES'">已达成</span>
+            <span v-else-if="scope.row.tradeStatus === 'NO'">未达成</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="tradeType"
+          label="交易类型"
+          align="center"
+          :filters="[
+            { text: '收购', value: 'SOLD' },
+            { text: '出售', value: 'SALE' },
+          ]"
+          :filter-method="filterType"
+          filter-placement="bottom-end"
+        >
+          <template slot-scope="scope">
+            <span v-if="scope.row.tradeType === 'SOLD'">
+              <el-tag effect="dark" type="success">收购碳排量</el-tag></span
+            >
+            <span v-else-if="scope.row.tradeType === 'SALE'"
+              ><el-tag effect="dark" type="danger">出售碳排量</el-tag></span
+            >
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="emission"
+          label="交易总量(tCO₂)"
+          align="center"
+          sortable
         />
-      </el-form-item>
-
-      <el-form-item>
-        <el-button
-          size="small"
-          type="primary"
-          icon="el-icon-search"
-          @click="handleSearch"
+        <el-table-column
+          prop="perEmission"
+          label="交易单价(碳币)"
+          align="center"
+          sortable
+        />
+        <el-table-column
+          prop="publishName"
+          label="甲方企业"
+          align="center"
+          sortable
+        />
+        <el-table-column
+          prop="orderCount"
+          label="关联交易数"
+          align="center"
+          sortable
         >
-          查询
-        </el-button>
-
-        <el-button
-          size="small"
-          type="primary"
-          icon="el-icon-refresh-left"
-          @click="handleReset"
-          >清空</el-button
+          <template slot-scope="scope">{{
+            scope.row.orderID.length
+          }}</template></el-table-column
         >
-      </el-form-item>
-    </el-form>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <router-link
+              :to="{
+                path: '/trade/detail',
+                query: { orderID: scope.row.orderID },
+              }"
+            >
+              <el-button icon="el-icon-document-copy" size="mini"
+                >详情</el-button
+              >
+            </router-link>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <el-table
-      :data="tableData.slice(pageBegin, pageEnd)"
-      v-loading="listLoading"
-      element-loading-text="Loading"
-      stripe
-      fit
-      highlight-current-row
-      :default-sort="{ prop: 'tradeID', order: 'descending' }"
-    >
-      <el-table-column
-        prop="tradeID"
-        label="交易编号"
-        align="center"
-        sortable
-      />
-      <el-table-column
-        prop="tradeStatus"
-        label="交易状态"
-        align="center"
-        :filters="[
-          { text: '已达成', value: 'YES' },
-          { text: '未达成', value: 'NO' },
-        ]"
-        :filter-method="filterStatus"
-        filter-placement="bottom-end"
-      >
-        <template slot-scope="scope">
-          <span v-if="scope.row.tradeStatus === 'YES'">已达成交易</span>
-          <span v-else-if="scope.row.tradeStatus === 'NO'">未达成交易</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="tradeType"
-        label="交易类型"
-        align="center"
-        :filters="[
-          { text: '收购', value: 'SOLD' },
-          { text: '出售', value: 'SALE' },
-        ]"
-        :filter-method="filterType"
-        filter-placement="bottom-end"
-      >
-        <template slot-scope="scope">
-          <span v-if="scope.row.tradeType === 'SOLD'">
-            <el-tag effect="dark" type="success">收购碳排量</el-tag></span
-          >
-          <span v-else-if="scope.row.tradeType === 'SALE'"
-            ><el-tag effect="dark" type="danger">出售碳排量</el-tag></span
-          >
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="emission"
-        label="交易总量(tCO₂)"
-        align="center"
-        sortable
-      />
-      <el-table-column
-        prop="perEmission"
-        label="交易单价(碳币)"
-        align="center"
-        sortable
-      />
-      <el-table-column
-        prop="publishName"
-        label="甲方企业"
-        align="center"
-        sortable
-      />
-      <!-- <el-table-column prop="orderID" label="订单编号" align="center" /> -->
-      <el-table-column label="操作" width="200" align="center">
-        <template slot-scope="scope">
-          <!-- {path:'/test',query: { userId: 123,userName:'xia' }} -->
-          <!-- <router-link
-            :to="'/trade/detail/' + scope.row.orderID"
-            style="margin-right: 10px"
-          >
-            <el-button icon="el-icon-document-copy" size="mini">详情</el-button>
-          </router-link> -->
-          <router-link
-            :to="{
-              path: '/trade/detail',
-              query: { orderID: scope.row.orderID },
-            }"
-          >
-            <el-button icon="el-icon-document-copy" size="mini">详情</el-button>
-          </router-link>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 分页 -->
-    <div style="display: flex; justify-content: right">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pageNum"
-        :page-sizes="[10, 20, 30, 50]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="this.tradeListEnterpriseLength"
-        style="padding: 30px 0"
-      >
-      </el-pagination>
+      <!-- 分页 -->
+      <div style="display: flex; justify-content: right">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageNum"
+          :page-sizes="[10, 20, 30, 50]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="this.tradeListEnterpriseLength"
+          style="padding: 30px 0"
+        >
+        </el-pagination>
+      </div>
     </div>
   </div>
 </template>
@@ -164,6 +178,8 @@ export default {
   },
   data() {
     return {
+      role: undefined,
+      orderCount: 0,
       tableData: [],
       tradeListEnterprise: [],
       tradeListEnterpriseLength: undefined,
@@ -203,6 +219,7 @@ export default {
     fetchData() {
       this.listLoading = true;
       let token = Cookie.get("token");
+      this.role = Cookie.get("role");
       tradeAPI.getTradeList(token).then((response) => {
         this.tradeListEnterprise = response.data.tradeListEnterprise;
         this.tradeListEnterpriseLength = this.tradeListEnterprise.length;

@@ -74,46 +74,67 @@
         </template></el-table-column
       >
       <el-table-column label="操作" align="center">
-        <el-button
-          type="primary"
-          icon="el-icon-edit"
-          size="mini"
-          @click="dialogFormVisible = true"
-          >编辑</el-button
-        >
-        <el-button
-          type="danger"
-          icon="el-icon-delete"
-          size="mini"
-          @click="warning"
-          >删除</el-button
-        >
+        <template slot-scope="scope">
+          <el-link
+            type="primary"
+            :underline="false"
+            @click="editUserType(scope.row)"
+            >编辑</el-link
+          >
+        </template>
       </el-table-column>
     </el-table>
 
     <!-- 编辑框 -->
-    <el-dialog title="编辑碳配额" :visible.sync="dialogFormVisible">
-      <el-form :model="list">
-        <el-form-item label="企业名称" :label-width="formLabelWidth">
-          <el-input id="myText" autocomplete="off" disabled></el-input>
+    <el-dialog title="编辑账户类型" :visible.sync="dialogFormVisible">
+      <el-form :model="userItem">
+        <el-form-item label="账户编号" :label-width="formLabelWidth">
+          <el-input
+            id="myText"
+            :value="userItem.userID"
+            autocomplete="off"
+            disabled
+          ></el-input>
         </el-form-item>
-        <el-form-item label="企业类型" :label-width="formLabelWidth">
-          <el-input id="myText" autocomplete="off" disabled></el-input>
+        <el-form-item label="账户名称" :label-width="formLabelWidth">
+          <el-input
+            id="myText"
+            :value="userItem.userName"
+            autocomplete="off"
+            disabled
+          ></el-input>
         </el-form-item>
-        <el-form-item label="碳配额" :label-width="formLabelWidth">
-          <el-input-number
-            v-model="num"
-            @change="handleChange"
-            :min="1"
-            :max="10"
-          ></el-input-number>
+        <el-form-item label="账户类型" :label-width="formLabelWidth">
+          <el-select
+            v-if="userItem.userType !== '企业'"
+            v-model="newUserType"
+            placeholder="请选择"
+          >
+            <el-option
+              :value="'数据审核员'"
+              :disabled="userItem.userType === '数据审核员'"
+            />
+            <el-option
+              :value="'第三方监管机构'"
+              :disabled="userItem.userType === '第三方监管机构'"
+            />
+            <el-option
+              :value="'管理员'"
+              :disabled="userItem.userType === '管理员'"
+            />
+          </el-select>
+          <el-input
+            v-else
+            id="myText"
+            :value="userItem.userType"
+            autocomplete="off"
+            disabled
+          ></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="updateUserType">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -136,6 +157,7 @@
 
 <script>
 import auditAPI from "@/api/audit";
+import Cookies from "js-cookie";
 
 export default {
   filters: {
@@ -155,9 +177,15 @@ export default {
       tableData: {},
       userList: {},
       userListLength: undefined,
+      userItem: {
+        userID: "",
+        userName: "",
+        userType: "",
+      },
+      newUserType: "",
       listLoading: true,
       dialogFormVisible: false,
-      formLabelWidth: "120px",
+      formLabelWidth: "200px",
       num: 1,
       pageBegin: 0,
       pageEnd: 0,
@@ -199,9 +227,26 @@ export default {
         this.listLoading = false;
       });
     },
-    setItemText(percentage) {
-      return percentage * 10;
+
+    editUserType(userItem) {
+      this.dialogFormVisible = true;
+      this.userItem = userItem;
     },
+
+    updateUserType() {
+      let token = Cookies.get("token");
+      auditAPI
+        .updateUserType(token, this.userItem.userID, this.newUserType)
+        .then((response) => {
+          this.$message({
+            message: "账户类型编辑成功！",
+            type: "success",
+          });
+          this.dialogFormVisible = false;
+          this.fetchData();
+        });
+    },
+
     warning() {
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -221,12 +266,14 @@ export default {
           });
         });
     },
+
     formatter(row, column) {
       return row.address;
     },
     filterType(value, row) {
       return row.userType === value;
     },
+
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.pageSize = val;

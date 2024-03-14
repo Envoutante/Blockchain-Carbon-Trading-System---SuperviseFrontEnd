@@ -1,126 +1,150 @@
 <template>
   <div class="app-container">
     <div class="content-container">
-      <el-form
-        style="margin-top: 10px"
-        label-width="200px"
-        class="form-table"
-        v-loading="loading"
-      >
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="企业名：">
-              {{ bindDetail.enterpriseName }}
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <el-steps :active="activeStep" align-center>
+        <el-step
+          title="提交绑定申请"
+          description="账户提交待绑定企业信息"
+        ></el-step>
+        <el-step
+          title="审核"
+          description="监管端账户审核企业端账户提交的绑定信息"
+        ></el-step>
+        <el-step
+          title="公布审核结果"
+          description="企业端账户查看审核结果"
+        ></el-step>
+      </el-steps>
 
-        <el-row>
-          <el-col :span="18">
-            <el-form-item label="企业地址：">
-              {{ bindDetail.enterprisePosition }}
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <a-divider />
 
-        <el-row>
-          <el-col :span="10">
-            <el-form-item label="企业组织机构代码：">
-              <el-input :value="bindDetail.enterpriseID" disabled></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <div>
+        <el-form
+          style="margin-top: 10px"
+          label-width="200px"
+          class="form-table"
+          v-loading="loading"
+        >
+          <el-row>
+            <el-col :span="6">
+              <el-form-item label="企业名：">
+                {{ bindDetail.enterpriseName }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="企业性质：">
-              {{ bindDetail.enterpriseCharacter }}
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <el-row>
+            <el-col :span="18">
+              <el-form-item label="企业地址：">
+                {{ bindDetail.enterprisePosition }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="企业所在行业：">
-              {{ bindDetail.enterpriseClass | companyFilter }}
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <el-row>
+            <el-col :span="10">
+              <el-form-item label="企业组织机构代码：">
+                <el-input :value="bindDetail.enterpriseID" disabled></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="企业法人：">
-              {{ bindDetail.enterpriseLegelPerson }}
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <el-row>
+            <el-col :span="6">
+              <el-form-item label="企业性质：">
+                {{ bindDetail.enterpriseCharacter }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="企业填报负责人：">
-              {{ bindDetail.enterpriseResponsiblePerson }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="填报负责人邮箱：">
-              {{ bindDetail.enterpriseResponsibleEmail }}
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <el-row>
+            <el-col :span="6">
+              <el-form-item label="企业所在行业：">
+                {{ bindDetail.enterpriseClass | companyFilter }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="18">
-            <el-form-item label="企业简介：">
-              {{ bindDetail.enterpriseDescription }}
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-    </div>
+          <el-row>
+            <el-col :span="6">
+              <el-form-item label="企业法人：">
+                {{ bindDetail.enterpriseLegelPerson }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-    <div v-if="bindStatus === 'PASS'" class="content-container">
-      <el-form
-        style="margin: 10px 0"
-        label-width="200px"
-        class="form-table"
-        v-loading="loading"
-      >
-        <el-row>
-          <el-col :span="18">
-            <el-form-item label="审核结果：" :required="true">
-              <el-radio v-model="auditStatus" label="PASS">通过</el-radio>
-              <el-radio v-model="auditStatus" label="REFUSE">驳回</el-radio>
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <el-row>
+            <el-col :span="6">
+              <el-form-item label="企业填报负责人：">
+                {{ bindDetail.enterpriseResponsiblePerson }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row v-if="auditStatus === 'REFUSE'">
-          <el-col :span="16">
-            <el-form-item label="审核意见：" :required="true">
-              <el-input
-                resize="none"
-                type="textarea"
-                :rows="5"
-                placeholder="请输入驳回此申请的原因"
-                v-model="auditOpinion"
-              >
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <el-row>
+            <el-col :span="6">
+              <el-form-item label="填报负责人邮箱：">
+                {{ bindDetail.enterpriseResponsibleEmail }}
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-form-item>
-          <router-link
-            :to="'/account/bind/'"
-            style="margin-right: 30px; float: left"
-          >
-            <el-button>返回</el-button>
-          </router-link>
-          <el-button style="float: left" type="primary" @click="handleSubmit"
-            >提交</el-button
-          >
-        </el-form-item>
-      </el-form>
+          <el-row>
+            <el-col :span="18">
+              <el-form-item label="企业简介：">
+                {{ bindDetail.enterpriseDescription }}
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </div>
+
+      <a-divider />
+
+      <div v-if="bindStatus === 'PASS'">
+        <el-form
+          style="margin: 10px 0"
+          label-width="200px"
+          class="form-table"
+          v-loading="loading"
+        >
+          <el-row>
+            <el-col :span="18">
+              <el-form-item label="审核结果：" :required="true">
+                <el-radio v-model="auditStatus" label="PASS">通过</el-radio>
+                <el-radio v-model="auditStatus" label="REFUSE">驳回</el-radio>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row v-if="auditStatus === 'REFUSE'">
+            <el-col :span="16">
+              <el-form-item label="审核意见：" :required="true">
+                <el-input
+                  resize="none"
+                  type="textarea"
+                  :rows="5"
+                  placeholder="请填写驳回此申请的原因"
+                  v-model="auditOpinion"
+                >
+                </el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-form-item>
+            <router-link
+              :to="'/account/bind/'"
+              style="margin-right: 30px; float: left"
+            >
+              <el-button>返回</el-button>
+            </router-link>
+            <el-button style="float: left" type="primary" @click="handleSubmit"
+              >提交</el-button
+            >
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
   </div>
 </template>
@@ -150,6 +174,7 @@ export default {
 
   data() {
     return {
+      activeStep: 0,
       loading: true,
       userID: "",
       bindDetail: {},
@@ -171,6 +196,16 @@ export default {
       console.log(this.enterpriseID);
       auditAPI.getBindDetail(token, this.enterpriseID).then((response) => {
         this.bindDetail = response.data;
+        if (this.bindDetail.bindStatus === "WAIT") {
+          this.activeStep = 1;
+        } else if (this.bindDetail.bindStatus === "AUDIT") {
+          this.activeStep = 2;
+        } else if (
+          this.bindDetail.bindStatus === "PASS" ||
+          this.bindDetail.bindStatus === "REFUSE"
+        ) {
+          this.activeStep = 3;
+        }
         this.loading = false;
       });
     },
@@ -244,7 +279,7 @@ export default {
   padding: 20px 5px;
   margin-bottom: 10px;
   border-radius: 5px;
-  box-shadow: 0 1px 5px rgb(0, 0, 0, 0.2);
+  /* box-shadow: 0 1px 5px rgb(0, 0, 0, 0.2); */
 }
 
 .el-input.is-disabled /deep/ .el-input__inner {

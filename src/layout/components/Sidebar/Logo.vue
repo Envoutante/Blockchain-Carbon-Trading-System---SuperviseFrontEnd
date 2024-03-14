@@ -7,12 +7,15 @@
         class="sidebar-logo-link"
         to="/"
       >
-        <img v-if="logo" :src="logo" class="sidebar-logo" />
-        <h1 v-else class="sidebar-title">{{ title }}</h1>
+        <!-- <img v-if="logo" :src="logo" class="sidebar-logo" /> -->
+        <img src="@/assets/logo.png" class="sidebar-left-logo" />
+        <!-- <h1 v-else class="sidebar-title">{{ title }}</h1> -->
       </router-link>
+
       <router-link v-else key="expand" class="sidebar-logo-link" to="/">
-        <img v-if="logo" :src="logo" class="sidebar-logo" />
-        <h1 class="sidebar-title">{{ title }}</h1>
+        <img src="@/assets/logo.png" class="sidebar-left-logo" />
+        <span class="sidebar-title">{{ title }}</span>
+        <img src="@/assets/sub_logo.png" class="sidebar-right-logo" />
       </router-link>
     </transition>
   </div>
@@ -21,12 +24,14 @@
 <script>
 export default {
   name: "SidebarLogo",
+
   props: {
     collapse: {
       type: Boolean,
       required: true,
     },
   },
+
   data() {
     return {
       title: "碳盟链道",
@@ -59,11 +64,19 @@ export default {
     height: 100%;
     width: 100%;
 
-    & .sidebar-logo {
-      width: 32px;
-      height: 32px;
+    & .sidebar-left-logo {
+      // width: 20px;
+      height: 28px;
       vertical-align: middle;
-      margin-right: 12px;
+      margin-right: 5px;
+    }
+
+    & .sidebar-right-logo {
+      // width: 20px;
+      height: 25px;
+      vertical-align: middle;
+      margin-left: 3px;
+      margin-top: -10px;
     }
 
     & .sidebar-title {
@@ -72,14 +85,14 @@ export default {
       color: #1890ff;
       font-weight: 600;
       line-height: 50px;
-      font-size: 20px;
+      font-size: 18px;
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
       vertical-align: middle;
     }
   }
 
   &.collapse {
-    .sidebar-logo {
+    .sidebar-left-logo {
       margin-right: 0px;
     }
   }

@@ -359,7 +359,7 @@ export default {
         statusType = false;
         this.$message({
           type: "error",
-          message: "请选择需要编辑的企业！",
+          message: "请勾选需要编辑的企业！",
         });
       }
 

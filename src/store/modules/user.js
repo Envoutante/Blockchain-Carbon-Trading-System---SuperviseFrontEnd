@@ -28,6 +28,7 @@ const mutations = {
   },
 };
 
+import Cookies from "js-cookie";
 const actions = {
   // user login
   login({ commit }, userInfo) {
@@ -41,6 +42,8 @@ const actions = {
           // const { data } = response.data;
           commit("SET_TOKEN", response.data.token);
           setToken(response.data.token);
+          Cookies.set("userName", userName);
+          Cookies.set("role", response.data.role);
           resolve();
         })
         .catch((error) => {

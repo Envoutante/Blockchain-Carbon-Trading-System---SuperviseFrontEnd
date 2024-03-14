@@ -10,7 +10,8 @@
         background-color: #f7f9fe;
         text-align: center;
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 500;
+        color: #909399;
       "
     >
       碳盟链道 · 监管端

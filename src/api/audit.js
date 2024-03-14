@@ -40,4 +40,16 @@ export default {
       },
     });
   },
+
+  updateUserType(token, userID, userType) {
+    return request({
+      url: "/audit/changeUserType",
+      method: "post",
+      data: {
+        token: token,
+        userID: userID,
+        userType: userType,
+      },
+    });
+  },
 };

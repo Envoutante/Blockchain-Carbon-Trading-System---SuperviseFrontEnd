@@ -158,10 +158,12 @@ export default {
 
   methods: {
     // 预览 PDF
-    previewPDF(row, index, pdfURL) {
+    previewPDF(pdfURL) {
       this.previewDialog = true;
+      pdfURL += ".pdf";
       this.url = pdfURL ? pdfURL : this.url;
-      console.log("PDF：", row, index, this.url);
+      this.url = pdfURL ? pdfURL : this.url;
+      console.log("PDF：", this.url);
     },
     // 上一页函数，
     prePage() {
@@ -203,9 +205,7 @@ export default {
     pdfDownload() {
       const that = this;
       var oReq = new XMLHttpRequest();
-      //http://8.137.108.102:8080/download/QmUbz22gMWNJbMMXyFzTENgDfSzXbVY7m75F1Q95nfKcES
-      var URL =
-        "http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf";
+      var URL = this.url;
       oReq.open("GET", URL, true);
       oReq.responseType = "blob";
       oReq.onload = function () {
