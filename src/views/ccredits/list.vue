@@ -53,17 +53,9 @@
         <el-button
           size="small"
           type="primary"
-          icon="el-icon-edit"
+          icon="el-icon-edit-outline"
           @click="batchEditVisible = true"
           >批量编辑</el-button
-        >
-
-        <el-button
-          size="small"
-          type="danger"
-          icon="el-icon-delete"
-          @click="insertData()"
-          >批量删除</el-button
         >
       </el-form-item>
     </el-form>
@@ -89,20 +81,6 @@
       </span>
     </el-dialog>
 
-    <!-- <el-table
-      :data="tableData.slice(pageBegin, pageEnd)"
-      style="width: 100%"
-      stripe
-      v-loading="listLoading"
-      :row-key="
-        (row) => {
-          return row.id;
-        }
-      "
-      :reserve-selection="true"
-      @selection-change="handleSelect"
-      :default-sort="{ prop: 'enterpriseID', order: 'descending' }"
-    > -->
     <el-table
       :data="tableData.slice(pageBegin, pageEnd)"
       style="width: 100%"
@@ -162,19 +140,12 @@
       <el-table-column prop="coCoin" label="碳币余额" align="center" sortable />
       <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
-          <el-button
+          <el-link
             type="primary"
-            icon="el-icon-edit"
             size="mini"
+            :underline="false"
             @click="editCcredits(scope.row)"
-            >编辑</el-button
-          >
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-            @click="warning"
-            >删除</el-button
+            >编辑</el-link
           >
         </template>
       </el-table-column>

@@ -39,12 +39,12 @@
     </el-form>
 
     <!-- 批量审核 -->
-    <el-button size="small" type="primary">批量审核</el-button>
+    <!-- <el-button size="small" type="primary">批量审核</el-button> -->
 
     <!-- 表格 -->
     <el-table
       :data="tableData.slice(pageBegin, pageEnd)"
-      style="width: 100%; margin-top: 20px"
+      style="width: 100%"
       stripe
       v-loading="listLoading"
     >

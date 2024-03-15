@@ -1,61 +1,76 @@
 <template>
   <div class="app-container">
-    <router-link :to="'/ccredits/list'">
-      <el-button type="primary" size="small" style="margin: 0 0 20px 0"
-        >返回</el-button
-      >
-    </router-link>
     <div class="content-container">
-      <!-- 循环data中定义的数组 -->
-      <div v-for="(item, index) in enterpriseIDList" :key="index">
-        <span style="font-size: 18px; color: #1890ff; font-weight: 600"
-          >企业 {{ index + 1 }}</span
-        >
-
-        <el-form
-          label-width="200px"
-          class="form-table"
-          style="margin-top: 20px"
-        >
-          <el-row>
-            <el-col :span="10">
-              <el-form-item label="企业组织机构代码：">
-                <el-input v-model="item.enterpriseID"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-      </div>
-
-      <el-form
-        label-width="200px"
-        class="form-table"
-        style="
-          margin-top: 20px;
-          border-top: 2px solid #fafafa;
-          padding-top: 30px;
-        "
+      <el-form label-width="200px" style="margin-top: 20px" id="input"
         ><el-row>
           <el-col :span="10">
             <el-form-item label="统一设置碳配额：">
-              <el-input-number v-model="emission" :min="1" :max="10" />
+              <el-input
+                style="width: 200px; float: left"
+                v-model="emission"
+              ></el-input>
             </el-form-item>
           </el-col> </el-row
       ></el-form>
 
+      <a-divider />
+
+      <!-- 循环data中定义的数组 -->
+      <div v-for="(item, index) in enterpriseIDList" :key="index">
+        <el-form label-width="200px" id="input" style="margin-top: 20px">
+          <el-form-item :label="'企业 ' + (index + 1) + ' 组织机构代码：'">
+            <el-input
+              style="width: 200px; float: left"
+              v-model="item.enterpriseID"
+            ></el-input>
+            <div style="float: left">
+              <el-link
+                @click="addForm"
+                type="primary"
+                size="small"
+                icon="el-icon-circle-plus-outline"
+                style="margin-left: 20px"
+                :underline="false"
+                >添加</el-link
+              >
+              <el-link
+                v-if="enterpriseIDList.length > 1"
+                @click="removeIdx(item, index)"
+                type="danger"
+                size="small"
+                icon="el-icon-remove-outline"
+                style="margin-left: 20px"
+                :underline="false"
+                >删除</el-link
+              >
+            </div>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <a-divider style="margin-top: 50px" />
+
       <!-- 操作按钮 -->
-      <div>
-        <el-button @click="submitForm" type="success" size="small"
+      <div style="display: flex; justify-content: center; margin-top: 30px">
+        <router-link :to="'/ccredits/list'">
+          <el-button size="small">返回</el-button></router-link
+        >
+
+        <el-button
+          @click="submitForm"
+          style="margin-left: 20px"
+          type="primary"
+          size="small"
           >提交</el-button
         >
-        <el-button @click="addForm" type="primary" size="small">添加</el-button>
+        <!-- <el-button @click="addForm" type="primary" size="small">添加</el-button>
         <el-button
           v-if="enterpriseIDList.length > 1"
           @click="removeIdx(item, index)"
           type="danger"
           size="small"
           >删除</el-button
-        >
+        > -->
       </div>
     </div>
   </div>
@@ -74,7 +89,7 @@ export default {
           enterpriseID: "",
         },
       ],
-      emission: "",
+      emission: "1000",
     };
   },
   methods: {
@@ -108,14 +123,6 @@ export default {
               });
             });
         }
-        // ccreditsAPI
-        //   .addEmission(token, this.enterpriseIDList, this.emission)
-        //   .then((response) => {
-        //     this.$message({
-        //       message: response.message,
-        //       type: "success",
-        //     });
-        //   });
       }
       console.log(this.enterpriseIDList);
     },
@@ -169,10 +176,29 @@ h3 {
   padding: 20px 20px;
   margin-bottom: 10px;
   border-radius: 5px;
-  box-shadow: 0 1px 5px rgb(0, 0, 0, 0.2);
 }
 
 .el-input.is-disabled /deep/ .el-input__inner {
   color: #000000 !important;
+}
+
+*/deep/.el-input-group__append {
+  border-left: 0;
+  width: 90px;
+  height: 40px;
+  padding: 0;
+  font-size: 0;
+}
+
+#input /deep/.el-input__inner {
+  border-radius: 0px;
+  border-top-width: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 2px;
+  height: 25px;
+  padding: 0px 10px;
+  border-bottom-color: rgba(24, 144, 255, 1);
+  background-color: transparent !important;
 }
 </style>
