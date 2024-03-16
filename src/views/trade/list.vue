@@ -134,9 +134,7 @@
                 query: { orderID: scope.row.orderID },
               }"
             >
-              <el-button icon="el-icon-document-copy" size="mini"
-                >详情</el-button
-              >
+              <el-link type="primary" :underline="false">详情</el-link>
             </router-link>
           </template>
         </el-table-column>

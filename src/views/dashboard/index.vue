@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div style="background-color: #f7f9fe">
     <!-- 用户欢迎 -->
     <div style="height: 150px; background-color: #134089; padding: 20px">
       <div style="float: left; margin-left: 20px">
@@ -50,7 +50,9 @@
               </div>
               <div>
                 <el-statistic title="区块数量">
-                  <template slot="formatter"> {{ blocks }} </template>
+                  <template slot="formatter">
+                    {{ headData.latestBlock }}
+                  </template>
                 </el-statistic>
               </div>
             </div>
@@ -72,7 +74,7 @@
               </div>
               <div>
                 <el-statistic title="交易数量">
-                  <template slot="formatter"> {{ transactions }} </template>
+                  <template slot="formatter"> {{ headData.txCount }} </template>
                 </el-statistic>
               </div>
             </div>
@@ -94,7 +96,9 @@
               </div>
               <div>
                 <el-statistic title="节点数量">
-                  <template slot="formatter"> {{ nodes }} </template>
+                  <template slot="formatter">
+                    {{ headData.peerCount }}
+                  </template>
                 </el-statistic>
               </div>
             </div>
@@ -116,7 +120,9 @@
               </div>
               <div>
                 <el-statistic title="链码数量">
-                  <template slot="formatter"> {{ chaincodes }} </template>
+                  <template slot="formatter">
+                    {{ headData.chaincodeCount }}
+                  </template>
                 </el-statistic>
               </div>
             </div>
@@ -125,43 +131,76 @@
       </el-card>
     </div>
 
-    <div style="padding: 10px 10px">
+    <!-- 数据列表 -->
+    <div style="margin-top: 20px">
       <el-row type="flex" justify="center">
-        <el-col :span="12">
-          <el-card :body-style="{ padding: '0px' }">
-            <img src="@/assets/news.png" style="width: 100%" />
-            <div
-              style="
-                height: 40px;
-                display: flex;
-                align-items: center;
-                padding-left: 10px;
-              "
+        <el-col :span="11">
+          <el-card>
+            <el-table :data="peerStatus" stripe border style="width: 100%">
+              <el-table-column prop="requests" label="配对名" align="center" />
+              <el-table-column
+                prop="status"
+                label="状态"
+                width="200px"
+                align="center"
+                ><template slot-scope="scope">
+                  <el-tag v-if="scope.row.status === 'UP'" type="success"
+                    >好得很</el-tag
+                  >
+                  <el-tag v-else>不太行</el-tag>
+                </template></el-table-column
+              ></el-table
             >
-              <el-link
-                type="primary"
-                :underline="false"
-                href="https://zfxxgk.ndrc.gov.cn/web/iteminfo.jsp?id=1776"
-                >点击查看详情</el-link
+          </el-card>
+
+          <el-card style="margin: 20px 0; height: 520px" class="scrollable-div"
+            ><el-timeline
+              v-for="(item, index) in transactionList.slice(0, 4)"
+              :key="index"
+            >
+              <el-timeline-item
+                :timestamp="
+                  dayjs(item.createdt).format('YYYY[年]-MM[月]-DD[日] HH:mm:ss')
+                "
+                placement="top"
               >
-            </div>
+                <div
+                  style="
+                    height: 50px;
+                    background-color: #1890ff;
+                    display: flex;
+                    align-items: center;
+                    padding-left: 20px;
+                  "
+                >
+                  <span
+                    style="
+                      color: #ffffff;
+                      font-size: 20px;
+                      font-weight: 600;
+                      line-height: 50px;
+                    "
+                    >交易{{ index + 1 }}</span
+                  >
+                </div>
+                <el-card>
+                  <p>链码名称：{{ item.chaincodename }}</p>
+                  <p>通道名称：{{ item.channelname }}</p>
+                  <p>创建者名称：{{ item.creator_msp_id }}</p>
+                  <p>哈希值：{{ item.txhash }}</p>
+                  <p>类型：{{ item.type }}</p>
+                </el-card>
+              </el-timeline-item></el-timeline
+            >
           </el-card>
         </el-col>
 
         <el-col :span="12" style="margin-left: 20px">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span>核算方法与报告指南</span>
-            </div>
-            <div v-for="(rule, index) in calculateRule" :key="index">
-              <el-link
-                type="primary"
-                :underline="false"
-                href=""
-                style="color: #909399"
-                >{{ index + 1 + ". " + rule.text }}</el-link
-              >
-            </div>
+          <el-card>
+            <div
+              id="main"
+              style="width: 100%; height: 520px; background: #fff"
+            ></div>
           </el-card>
         </el-col>
       </el-row>
@@ -171,67 +210,240 @@
 
 <script>
 import Cookies from "js-cookie";
+import * as echarts from "echarts";
+import dashboardAPI from "@/api/dashboard";
 
 export default {
   data() {
     return {
       userName: "",
-      blocks: 70,
-      transactions: 70,
-      nodes: 4,
-      chaincodes: 1,
-      calculateRule: [
-        {
-          text: "《中国发电企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国电网企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国钢铁生产企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国化工生产企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国电解铝生产企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国镁冶炼企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国平板玻璃生产企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国水泥生产企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国陶瓷生产企业温室气体排放核算方法与报告指南（试行）》",
-          href: "#link1",
-        },
-        {
-          text: "《中国民航企业温室气体排放核算方法与报告格式指南（试行）》",
-          href: "#link1",
-        },
-      ],
+      headData: {
+        latestBlock: 0,
+        txCount: 0,
+        peerCount: 0,
+        chaincodeCount: 0,
+      },
+      peerStatus: {},
+      blocksData: {},
+      blocksLine: [],
+      transactionList: {},
     };
   },
 
   created() {
     this.fetchData();
+    this.platformLogin();
   },
 
   methods: {
     fetchData() {
       this.userName = Cookies.get("userName");
+    },
+
+    platformLogin() {
+      let url = "/auth/login";
+      let urlType = "POST";
+      let postBody = {
+        user: "exploreradmin",
+        password: "exploreradminpw",
+        network: "org1-network",
+      };
+      dashboardAPI.turnToPost(url, urlType, postBody).then((response) => {
+        localStorage.setItem("platformToken", response.token);
+        this.getCurChannel();
+      });
+    },
+
+    getCurChannel() {
+      let url = "/api/curChannel";
+      let urlType = "GET";
+      let token = localStorage.getItem("platformToken");
+      dashboardAPI.turnToGet(url, urlType, token).then((response) => {
+        localStorage.setItem("currentChannel", response.currentChannel);
+        this.getHeadData();
+        this.getPeerStatus();
+        this.getBlocksByHour();
+        this.getTransactionList();
+      });
+    },
+
+    getHeadData() {
+      let currentChannel = localStorage.getItem("currentChannel");
+      let url = "/api/status/" + currentChannel;
+      let urlType = "GET";
+      let token = localStorage.getItem("platformToken");
+      dashboardAPI.turnToGet(url, urlType, token).then((response) => {
+        this.headData.latestBlock = response.latestBlock;
+        this.headData.txCount = response.txCount;
+        this.headData.peerCount = response.peerCount;
+        this.headData.chaincodeCount = response.chaincodeCount;
+      });
+    },
+
+    getPeerStatus() {
+      let currentChannel = localStorage.getItem("currentChannel");
+      let url = "/api/peersStatus/" + currentChannel;
+      let urlType = "GET";
+      let token = localStorage.getItem("platformToken");
+      dashboardAPI.turnToGet(url, urlType, token).then((response) => {
+        this.peerStatus = response.peers;
+      });
+    },
+
+    getBlocksByHour() {
+      let currentChannel = localStorage.getItem("currentChannel");
+      let url = "/api/blocksByHour/" + currentChannel + "/1";
+      let urlType = "GET";
+      let token = localStorage.getItem("platformToken");
+      dashboardAPI.turnToGet(url, urlType, token).then((response) => {
+        this.blocksData = response.rows;
+        for (let i = 0; i < this.blocksData.length; i++) {
+          const date = new Date(this.blocksData[i].datetime);
+          let arr = new Array();
+          // arr.push(date.getHours());
+          arr.push(i); // 数据按顺序排列而非按时间排列
+          arr.push(parseInt(this.blocksData[i].count));
+          this.blocksLine.push(arr);
+        }
+        // 画图
+        // this.$nextTick(() => {
+        //   this.drawLine("main");
+        // });
+        setTimeout(() => {
+          this.drawLine("main");
+        }, 500);
+      });
+    },
+
+    getTransactionList() {
+      let currentChannel = localStorage.getItem("currentChannel");
+      let url =
+        "/api/txList/" +
+        currentChannel +
+        "/0/0?from=Mon%20Aug%2028%202023%2015:04:43%20GMT+0800%20(%E4%B8%AD%E5%9B%BD%E6%A0%87%E5%87%86%E6%97%B6%E9%97%B4)&to=Fri%20Sep%2005%202025%2015:04:43%20GMT+0800%20(%E4%B8%AD%E5%9B%BD%E6%A0%87%E5%87%86%E6%97%B6%E9%97%B4)&page=1&size=10";
+      let urlType = "GET";
+      let token = localStorage.getItem("platformToken");
+      dashboardAPI.turnToGet(url, urlType, token).then((response) => {
+        this.transactionList = response.rows.txnsData;
+      });
+    },
+
+    drawLine(id) {
+      var currentTime = new Date();
+      // 计算横坐标显示的时间范围，这里设置为近9个小时
+      var hoursToShow = 24;
+
+      // 生成横坐标的时间点
+      var xAxisData = [];
+      for (var i = 1; i <= hoursToShow; ++i) {
+        // 格式化时间，例如：17:00
+        var formattedTime;
+        if (currentTime.getHours() < 10) {
+          formattedTime = currentTime.getHours() - (hoursToShow - i);
+          if (formattedTime < 0) {
+            formattedTime += 24;
+            "0" + formattedTime;
+          }
+        } else {
+          formattedTime = currentTime.getHours() - (hoursToShow - i);
+          if (formattedTime < 0) {
+            formattedTime += 24;
+          }
+        }
+
+        formattedTime += ":00";
+        xAxisData.push(formattedTime);
+      }
+
+      this.charts = echarts.init(document.getElementById(id));
+
+      this.charts.setOption({
+        title: {
+          left: "3%",
+          top: "5%",
+          text: "最近一天区块数量", // 标题文本，支持使用 \n 换行。
+        },
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          align: "right", // 文字在前图标在后
+          left: "3%",
+          top: "15%",
+          data: ["区块个数"], // 要和后面对应上
+        },
+        grid: {
+          top: "30%",
+          left: "5%",
+          right: "5%",
+          bottom: "5%",
+          containLabel: true,
+        },
+
+        toolbox: {
+          feature: {
+            saveAsImage: {}, // 保存为图片
+          },
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: true,
+          axisTick: {
+            alignWithLabel: true, // 保证刻度线和标签对齐
+          },
+          splitLine: {
+            show: true, // 显示网格线
+          },
+          data: xAxisData, // x坐标的名称
+          axisLabel: {
+            formatter: function (value, index) {
+              return index % 2 == 0 ? value : "";
+            },
+          },
+        },
+        yAxis: {
+          type: "value",
+          boundaryGap: true,
+          splitNumber: 4,
+          max: 20,
+        },
+
+        series: [
+          {
+            name: "区块个数",
+            type: "line", // 折线图line;柱形图bar;饼图pie
+            stack: "总量",
+            data: this.blocksLine,
+            areaStyle: {
+              // 显示区域颜色---渐变效果
+              color: {
+                type: "linear",
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [
+                  {
+                    offset: 0,
+                    color: "rgb(255,200,213)", // 0% 处的颜色
+                  },
+                  {
+                    offset: 1,
+                    color: "#ffffff", // 100% 处的颜色
+                  },
+                ],
+                global: false, // 缺省为 false
+              },
+            },
+            itemStyle: {
+              color: "rgb(255,96,64)", // 改变折线点的颜色
+              lineStyle: {
+                color: "rgb(255,96,64)", // 改变折线颜色
+              },
+            },
+          },
+        ],
+      });
     },
   },
 };
@@ -252,5 +464,27 @@ export default {
 <style scoped>
 .el-form-item /deep/ .el-form-item__content {
   line-height: 20px !important;
+}
+
+.el-timeline /deep/ .el-timeline-item:last-child .el-timeline-item__tail {
+  display: block !important;
+}
+
+.el-timeline /deep/ .el-timeline-item__tail {
+  border-left: 2px solid #1890ff !important;
+}
+
+.el-timeline-item /deep/ .el-timeline-item__node {
+  background-color: #1890ff !important;
+}
+</style>
+
+<style>
+.scrollable-div {
+  overflow: auto;
+}
+
+.scrollable-div::-webkit-scrollbar {
+  display: none;
 }
 </style>

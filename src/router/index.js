@@ -58,7 +58,28 @@ export const constantRoutes = [
         path: "dashboard",
         name: "Home",
         component: () => import("@/views/dashboard/index"),
-        meta: { title: "工作台", icon: "el-icon-house" },
+        meta: { title: "仪表盘", icon: "el-icon-data-analysis" },
+      },
+    ],
+  },
+
+  {
+    path: "/platform",
+    component: Layout,
+    redirect: "/platform/blocks",
+    meta: { title: "区块链管理", icon: "el-icon-setting" },
+    children: [
+      {
+        path: "blocks",
+        name: "Blocks",
+        component: () => import("@/views/platform/block"),
+        meta: { title: "区块信息" },
+      },
+      {
+        path: "transactions",
+        name: "Transactions",
+        component: () => import("@/views/platform/transaction"),
+        meta: { title: "交易事务" },
       },
     ],
   },
@@ -141,7 +162,7 @@ export const constantRoutes = [
     path: "/account",
     component: Layout,
     redirect: "/account/list",
-    meta: { title: "账户管理区", icon: "el-icon-set-up" },
+    meta: { title: "账户管理区", icon: "el-icon-open" },
     children: [
       {
         path: "list",

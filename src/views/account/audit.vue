@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div style="background-color: #ffffff; padding: 20px">
     <div class="content-container">
       <el-steps :active="activeStep" align-center>
         <el-step
@@ -18,132 +18,91 @@
 
       <a-divider />
 
-      <div>
+      <div style="display: flex; justify-content: center">
         <el-form
           style="margin-top: 10px"
           label-width="200px"
           class="form-table"
           v-loading="loading"
         >
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="企业名：">
-                {{ bindDetail.enterpriseName }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业名：">
+            {{ bindDetail.enterpriseName }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="18">
-              <el-form-item label="企业地址：">
-                {{ bindDetail.enterprisePosition }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业地址：">
+            {{ bindDetail.enterprisePosition }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="10">
-              <el-form-item label="企业组织机构代码：">
-                <el-input :value="bindDetail.enterpriseID" disabled></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业组织机构代码：">
+            <el-input :value="bindDetail.enterpriseID" disabled></el-input>
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="企业性质：">
-                {{ bindDetail.enterpriseCharacter }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业性质：">
+            {{ bindDetail.enterpriseCharacter }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="企业所在行业：">
-                {{ bindDetail.enterpriseClass | companyFilter }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业所在行业：">
+            {{ bindDetail.enterpriseClass | companyFilter }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="企业法人：">
-                {{ bindDetail.enterpriseLegelPerson }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业法人：">
+            {{ bindDetail.enterpriseLegelPerson }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="企业填报负责人：">
-                {{ bindDetail.enterpriseResponsiblePerson }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业填报负责人：">
+            {{ bindDetail.enterpriseResponsiblePerson }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="填报负责人邮箱：">
-                {{ bindDetail.enterpriseResponsibleEmail }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="填报负责人邮箱：">
+            {{ bindDetail.enterpriseResponsibleEmail }}
+          </el-form-item>
 
-          <el-row>
-            <el-col :span="18">
-              <el-form-item label="企业简介：">
-                {{ bindDetail.enterpriseDescription }}
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="企业简介：">
+            {{ bindDetail.enterpriseDescription }}
+          </el-form-item>
         </el-form>
       </div>
 
-      <a-divider />
+      <a-divider v-if="bindStatus === 'PASS'" />
 
       <div v-if="bindStatus === 'PASS'">
-        <el-form
-          style="margin: 10px 0"
-          label-width="200px"
-          class="form-table"
-          v-loading="loading"
-        >
-          <el-row>
-            <el-col :span="18">
+        <el-row type="flex" justify="center">
+          <el-col :span="10">
+            <el-form
+              style="margin: 10px 0"
+              label-width="200px"
+              class="form-table"
+              v-loading="loading"
+            >
               <el-form-item label="审核结果：" :required="true">
                 <el-radio v-model="auditStatus" label="PASS">通过</el-radio>
                 <el-radio v-model="auditStatus" label="REFUSE">驳回</el-radio>
               </el-form-item>
-            </el-col>
-          </el-row>
 
-          <el-row v-if="auditStatus === 'REFUSE'">
-            <el-col :span="16">
-              <el-form-item label="审核意见：" :required="true">
+              <el-form-item
+                v-if="auditStatus === 'REFUSE'"
+                label="审核意见："
+                :required="true"
+              >
                 <el-input
                   resize="none"
                   type="textarea"
                   :rows="5"
-                  placeholder="请填写驳回此申请的原因"
+                  placeholder="请填写驳回此申请的理由"
                   v-model="auditOpinion"
                 >
                 </el-input>
               </el-form-item>
-            </el-col>
-          </el-row>
+            </el-form>
+          </el-col>
+        </el-row>
+      </div>
 
-          <el-form-item>
-            <router-link
-              :to="'/account/bind/'"
-              style="margin-right: 30px; float: left"
-            >
-              <el-button>返回</el-button>
-            </router-link>
-            <el-button style="float: left" type="primary" @click="handleSubmit"
-              >提交</el-button
-            >
-          </el-form-item>
-        </el-form>
+      <div style="display: flex; justify-content: center; margin-top: 20px">
+        <router-link :to="'/account/bind/'" style="margin-right: 30px">
+          <el-button>返回</el-button>
+        </router-link>
+        <el-button type="primary" @click="handleSubmit">提交</el-button>
       </div>
     </div>
   </div>
@@ -196,14 +155,11 @@ export default {
       console.log(this.enterpriseID);
       auditAPI.getBindDetail(token, this.enterpriseID).then((response) => {
         this.bindDetail = response.data;
-        if (this.bindDetail.bindStatus === "WAIT") {
+        if (this.bindStatus === "WAIT") {
           this.activeStep = 1;
-        } else if (this.bindDetail.bindStatus === "AUDIT") {
+        } else if (this.bindStatus === "AUDIT") {
           this.activeStep = 2;
-        } else if (
-          this.bindDetail.bindStatus === "PASS" ||
-          this.bindDetail.bindStatus === "REFUSE"
-        ) {
+        } else if (this.bindStatus === "PASS" || this.bindStatus === "REFUSE") {
           this.activeStep = 3;
         }
         this.loading = false;

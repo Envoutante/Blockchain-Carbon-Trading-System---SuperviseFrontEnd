@@ -1,6 +1,9 @@
 <template>
   <div id="userLayout" class="user-layout-wrapper">
-    <div class="container">
+    <div
+      class="container"
+      style="display: flex; justify-content: center; align-items: center"
+    >
       <div class="user-layout-content" style="padding: 45px 0">
         <div
           style="display: flex; justify-content: center; align-items: center"
