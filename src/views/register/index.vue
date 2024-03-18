@@ -27,27 +27,8 @@
             <div class="top">
               <div class="header" style="padding-left: 50px">
                 <a href="/">
-                  <!-- <img src="~@/assets/logo.svg" class="logo" alt="logo" /> -->
+                  <img src="@/assets/logo.png" class="logo" alt="logo" />
                   <span class="title">碳盟链道</span>
-                  <!-- 差图片 -->
-                  <!-- <img
-                    class="logo"
-                    v-if="this.$store.state.app.lang.includes('zh')"
-                    src="@/assets/header/EnterpriseSideIndication.png"
-                    style="
-                      width: auto;
-                      transform: scale(0.85) translateY(-20px);
-                    "
-                  />
-                  <img
-                    class="logo"
-                    v-else
-                    src="@/assets/header/EnterpriseSideIndication_EN.png"
-                    style="
-                      width: auto;
-                      transform: scale(0.65) translateY(-25px);
-                    "
-                  /> -->
                   <img
                     class="logo"
                     src="@/assets/sub_logo.png"

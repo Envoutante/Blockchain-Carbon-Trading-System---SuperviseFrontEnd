@@ -28,6 +28,7 @@
     "nprogress": "0.2.0",
     "path-to-regexp": "2.4.0",
     "vue": "2.6.10",
+    "vue-axios": "^3.5.2",
     "vue-json-viewer": "^2.2.22",
     "vue-mathjax": "^0.1.1",
     "vue-pdf": "^4.3.0",

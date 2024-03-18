@@ -19,7 +19,7 @@
           font-size: 20px;
         "
       >
-        <el-form ref="form" :model="form" label-width="0">
+        <el-form label-width="0">
           <el-form-item>
             <span style="font-size: 25px">欢迎回来！{{ userName }}</span>
           </el-form-item>
@@ -144,55 +144,69 @@
                 width="200px"
                 align="center"
                 ><template slot-scope="scope">
-                  <el-tag v-if="scope.row.status === 'UP'" type="success"
-                    >好得很</el-tag
+                  <a-tag v-if="scope.row.status === 'UP'" color="green"
+                    >好得很</a-tag
                   >
-                  <el-tag v-else>不太行</el-tag>
+                  <a-tag v-else color="red">不太行</a-tag>
                 </template></el-table-column
               ></el-table
             >
           </el-card>
 
-          <el-card style="margin: 20px 0; height: 520px" class="scrollable-div"
-            ><el-timeline
-              v-for="(item, index) in transactionList.slice(0, 4)"
-              :key="index"
-            >
-              <el-timeline-item
-                :timestamp="
-                  dayjs(item.createdt).format('YYYY[年]-MM[月]-DD[日] HH:mm:ss')
-                "
-                placement="top"
+          <router-link :to="'/platform/blocks'">
+            <el-card
+              style="margin: 20px 0; height: 520px"
+              class="scrollable-div"
+              ><el-timeline
+                v-for="(item, index) in transactionList.slice(0, 4)"
+                :key="index"
               >
-                <div
-                  style="
-                    height: 50px;
-                    background-color: #1890ff;
-                    display: flex;
-                    align-items: center;
-                    padding-left: 20px;
+                <el-timeline-item
+                  :timestamp="
+                    dayjs(item.createdt).format(
+                      'YYYY[年]-MM[月]-DD[日] HH:mm:ss'
+                    )
                   "
+                  placement="top"
                 >
-                  <span
+                  <div
                     style="
-                      color: #ffffff;
-                      font-size: 20px;
-                      font-weight: 600;
-                      line-height: 50px;
+                      height: 50px;
+                      background-color: #1890ff;
+                      display: flex;
+                      align-items: center;
+                      padding-left: 20px;
                     "
-                    >交易{{ index + 1 }}</span
                   >
-                </div>
-                <el-card>
-                  <p>链码名称：{{ item.chaincodename }}</p>
-                  <p>通道名称：{{ item.channelname }}</p>
-                  <p>创建者名称：{{ item.creator_msp_id }}</p>
-                  <p>哈希值：{{ item.txhash }}</p>
-                  <p>类型：{{ item.type }}</p>
-                </el-card>
-              </el-timeline-item></el-timeline
-            >
-          </el-card>
+                    <span
+                      style="
+                        color: #ffffff;
+                        font-size: 18px;
+                        font-weight: 600;
+                        line-height: 50px;
+                      "
+                      >交易{{ index + 1 }}</span
+                    >
+                  </div>
+                  <el-card>
+                    <p>链码名称：{{ item.chaincodename }}</p>
+                    <p>通道名称：{{ item.channelname }}</p>
+                    <p>创建者名称：{{ item.creator_msp_id }}</p>
+                    <p>
+                      哈希值：
+                      <a-tooltip>
+                        <template #title>{{ item.txhash }}</template>
+                        <el-link type="primary" :underline="false">{{
+                          item.txhash | ellipsis
+                        }}</el-link>
+                      </a-tooltip>
+                    </p>
+                    <p>类型：{{ item.type }}</p>
+                  </el-card>
+                </el-timeline-item></el-timeline
+              >
+            </el-card>
+          </router-link>
         </el-col>
 
         <el-col :span="12" style="margin-left: 20px">
@@ -202,6 +216,20 @@
               style="width: 100%; height: 520px; background: #fff"
             ></div>
           </el-card>
+
+          <router-link :to="'/email'">
+            <el-card style="margin: 20px 0; height: 300px">
+              <div
+                style="font-size: 16px; font-weight: 600; margin-bottom: 10px"
+              >
+                邮件系统服务
+              </div>
+              <dv-scroll-board
+                :config="emailConfig"
+                style="width: 100%; height: 250px"
+              />
+            </el-card>
+          </router-link>
         </el-col>
       </el-row>
     </div>
@@ -212,8 +240,19 @@
 import Cookies from "js-cookie";
 import * as echarts from "echarts";
 import dashboardAPI from "@/api/dashboard";
+import dayjs from "dayjs";
 
 export default {
+  filters: {
+    ellipsis(value) {
+      if (!value) return "";
+      if (value.length >= 10) {
+        return value.slice(0, 15) + "...";
+      }
+      return value;
+    },
+  },
+
   data() {
     return {
       userName: "",
@@ -223,16 +262,32 @@ export default {
         peerCount: 0,
         chaincodeCount: 0,
       },
-      peerStatus: {},
+      peerStatus: [],
       blocksData: {},
       blocksLine: [],
       transactionList: {},
+
+      EmailDetailparam: {},
+      EmailDetailList: [],
+      emailConfig: {
+        header: ["收信企业", "收信邮箱", "发信状态"],
+        data: [],
+        index: true,
+        columnWidth: [50],
+        align: ["center"],
+        headerBGC: "#1890ff",
+      },
     };
+  },
+
+  mounted() {
+    this.getShowData();
   },
 
   created() {
     this.fetchData();
     this.platformLogin();
+    this.getEmailDetail();
   },
 
   methods: {
@@ -326,6 +381,55 @@ export default {
       dashboardAPI.turnToGet(url, urlType, token).then((response) => {
         this.transactionList = response.rows.txnsData;
       });
+    },
+
+    // 获取邮件信息
+    getEmailDetail() {
+      this.axios({
+        url: "https://mock.apifox.com/m1/2214773-0-default/getEmailDetailParam", // 写死
+        method: "get",
+        contentType: "application/json",
+      }).then((res) => {
+        this.EmailDetailparam = res.data.data;
+        this.getEmailList();
+      });
+    },
+
+    getEmailList() {
+      this.axios({
+        url:
+          "https://api.emailjs.com/api/v1.1/history?user_id=" +
+          this.EmailDetailparam.user_id +
+          "&accessToken=" +
+          this.EmailDetailparam.accessToken +
+          "&page=" +
+          1 +
+          "&count=" +
+          10,
+        method: "get", //注意是GET请求
+        contentType: "application/json",
+      }).then((res) => {
+        this.EmailDetailList = res.data.rows;
+        this.getShowData();
+      });
+    },
+
+    getShowData() {
+      let showData = new Array();
+      this.EmailDetailList.forEach((item) => {
+        // let id = item.id;
+        // let created_at = dayjs(item.created_at).format("YYYY/MM/DD HH:mm:ss");
+
+        let status = item.result == 1 ? "发信成功" : "发信失败";
+        let template_params = JSON.parse(item.template_params);
+        let newItem = [
+          template_params.to_enterpriseName,
+          template_params.to_email,
+          status,
+        ];
+        showData.push(newItem);
+      });
+      this.emailConfig.data = showData;
     },
 
     drawLine(id) {
@@ -477,6 +581,21 @@ export default {
 .el-timeline-item /deep/ .el-timeline-item__node {
   background-color: #1890ff !important;
 }
+
+.el-table /deep/ .el-table__body-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.el-table /deep/ .el-table__body-wrapper::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 3px;
+  display: none;
+}
+
+.el-table /deep/ .el-table__body-wrapper table {
+  width: 100%;
+}
 </style>
 
 <style>
@@ -486,5 +605,15 @@ export default {
 
 .scrollable-div::-webkit-scrollbar {
   display: none;
+}
+
+.el-table__header,
+.el-table__body,
+.el-table__footer {
+  width: 100% !important;
+}
+
+.el-table__header colgroup col[name="gutter"] {
+  width: 0px !important;
 }
 </style>

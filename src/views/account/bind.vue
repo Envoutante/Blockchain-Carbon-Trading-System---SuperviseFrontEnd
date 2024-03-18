@@ -70,9 +70,9 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag :type="scope.row.bindStatus | tagFilter">
+          <a-tag :color="scope.row.bindStatus | tagFilter">
             {{ scope.row.bindStatus | statusFilter }}
-          </el-tag>
+          </a-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="200" align="center">
@@ -159,10 +159,10 @@ export default {
     },
     tagFilter(status) {
       const tagMap = {
-        PASS: "success",
-        AUDIT: "primary",
-        REFUSE: "danger",
-        WAIT: "info",
+        PASS: "green",
+        AUDIT: "purple",
+        REFUSE: "red",
+        WAIT: "cyan",
       };
       return tagMap[status];
     },

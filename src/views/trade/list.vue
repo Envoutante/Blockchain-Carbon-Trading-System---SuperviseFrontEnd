@@ -50,7 +50,7 @@
       <el-table
         :data="tableData.slice(pageBegin, pageEnd)"
         v-loading="listLoading"
-        element-loading-text="Loading"
+        element-loading-text="加载中"
         stripe
         fit
         highlight-current-row
@@ -91,10 +91,10 @@
         >
           <template slot-scope="scope">
             <span v-if="scope.row.tradeType === 'SOLD'">
-              <el-tag effect="dark" type="success">收购碳排量</el-tag></span
+              <a-tag color="#108ee9">收购碳排量</a-tag></span
             >
             <span v-else-if="scope.row.tradeType === 'SALE'"
-              ><el-tag effect="dark" type="danger">出售碳排量</el-tag></span
+              ><a-tag color="#f50">出售碳排量</a-tag></span
             >
           </template>
         </el-table-column>

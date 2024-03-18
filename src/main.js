@@ -27,15 +27,14 @@ import store from "./store";
 import router from "./router";
 
 // ant-design-vue
-// import { createApp } from "vue";
-// import Antd from "ant-design-vue";
-// import "ant-design-vue/dist/reset.css";
-// const app = createApp(App);
-// app.use(Antd).mount("#app");
-
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 Vue.use(Antd);
+
+// 使用axios
+import axios from "axios";
+import VueAxios from "vue-axios";
+Vue.use(VueAxios, axios);
 
 import "@/icons"; // icon
 import "@/permission"; // permission control

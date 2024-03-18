@@ -41,7 +41,7 @@
     <el-table
       :data="tableData.slice(pageBegin, pageEnd)"
       v-loading="listLoading"
-      element-loading-text="Loading"
+      element-loading-text="加载中"
       stripe
       fit
       highlight-current-row
@@ -96,9 +96,9 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag :type="scope.row.auditStatus | tagFilter">
+          <a-tag :color="scope.row.auditStatus | tagFilter">
             {{ scope.row.auditStatus | statusFilter }}
-          </el-tag>
+          </a-tag>
         </template>
       </el-table-column>
       <el-table-column
@@ -123,8 +123,6 @@
       />
       <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
-          <!-- {path: item.path, query: {value:chil.value, cindex:cindex}} -->
-          <!-- '/calculate/detail/' + scope.row.enterpriseID -->
           <router-link
             :to="
               '/calculate/detail/' +
@@ -134,14 +132,40 @@
             "
             style="margin-right: 10px"
           >
-            <!-- <el-button type="success" icon="el-icon-search" size="mini"
-              >查看详情</el-button
-            > -->
-            <el-link type="primary" :underline="false">查看详情</el-link>
+            <el-link type="primary" :underline="false">详情</el-link>
           </router-link>
+
+          <el-link
+            v-if="
+              scope.row.auditStatus != 'PASS' &&
+              scope.row.auditStatus != 'AUDIT' &&
+              (scope.row.enterpriseID != linkID ||
+                scope.row.taskYear.toString() != linkYear ||
+                !linkLoad)
+            "
+            @click="sendEmail(scope.row.enterpriseID, scope.row.taskYear)"
+            type="primary"
+            :underline="false"
+            >邮件提醒</el-link
+          >
+
+          <el-link
+            v-if="
+              linkLoad &&
+              scope.row.enterpriseID == linkID &&
+              scope.row.taskYear.toString() == linkYear
+            "
+            type="primary"
+            :underline="false"
+            disabled
+            >发送中...</el-link
+          >
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 发送邮件组件 -->
+    <sonEmail ref="son" />
 
     <!-- 分页 -->
     <div style="display: flex; justify-content: right">
@@ -162,8 +186,11 @@
 
 <script>
 import calculateAPI from "@/api/calculate";
+import sonEmail from "./email.vue";
 
 export default {
+  components: { sonEmail },
+
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -176,10 +203,10 @@ export default {
     },
     tagFilter(status) {
       const tagMap = {
-        PASS: "success",
-        AUDIT: "primary",
-        REFUSE: "danger",
-        WAIT: "info",
+        PASS: "green",
+        AUDIT: "purple",
+        REFUSE: "red",
+        WAIT: "cyan",
       };
       return tagMap[status];
     },
@@ -217,6 +244,9 @@ export default {
       pageSize: 10,
       pageNum: 0,
       searchForm: { enterpriseID: "", enterpriseName: "" },
+      linkLoad: false,
+      linkID: "",
+      linkYear: "",
     };
   },
 
@@ -226,6 +256,20 @@ export default {
   },
 
   methods: {
+    sendEmail(enterpriseID, taskYear) {
+      this.$refs.son.getInfo(enterpriseID, taskYear);
+      this.linkID = enterpriseID;
+      this.linkYear = taskYear.toString();
+      this.linkLoad = true;
+    },
+    loadStatus(status) {
+      this.linkLoad = status;
+    },
+    resetRow() {
+      this.linkID = "";
+      this.linkYear = "";
+    },
+
     handleSearch() {
       let form = this.searchForm;
       let tableList = this.reportList;

@@ -68,9 +68,9 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag effect="plain" :type="scope.row.userType | tagFilter">
+          <a-tag :color="scope.row.userType | tagFilter">
             {{ scope.row.userType }}
-          </el-tag>
+          </a-tag>
         </template></el-table-column
       >
       <el-table-column label="操作" align="center">
@@ -163,10 +163,10 @@ export default {
   filters: {
     tagFilter(status) {
       const tagMap = {
-        企业: "",
-        数据审核员: "danger",
-        第三方监管机构: "danger",
-        管理员: "danger",
+        企业: "blue",
+        数据审核员: "red",
+        第三方监管机构: "red",
+        管理员: "red",
       };
       return tagMap[status];
     },

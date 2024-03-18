@@ -53,12 +53,20 @@ export const constantRoutes = [
     path: "/",
     component: Layout,
     redirect: "/dashboard",
+    meta: { title: "系统", icon: "el-icon-data-analysis" },
     children: [
       {
         path: "dashboard",
         name: "Home",
         component: () => import("@/views/dashboard/index"),
         meta: { title: "仪表盘", icon: "el-icon-data-analysis" },
+      },
+      {
+        path: "email",
+        name: "EmailList",
+        component: () => import("@/views/dashboard/email"),
+        meta: { title: "邮件管理" },
+        hidden: true,
       },
     ],
   },

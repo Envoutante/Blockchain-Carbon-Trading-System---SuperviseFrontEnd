@@ -42,7 +42,7 @@
     <el-table
       :data="tableData"
       v-loading="listLoading"
-      element-loading-text="Loading"
+      element-loading-text="加载中"
       stripe
       fit
       highlight-current-row
@@ -54,9 +54,12 @@
         sortable
       />
       <el-table-column prop="blockhash" label="哈希值" align="center" sortable
-        ><template slot-scope="scope">{{
-          scope.row.blockhash | ellipsis
-        }}</template></el-table-column
+        ><template slot-scope="scope"
+          ><a-tooltip>
+            <template #title>{{ scope.row.blockhash }}</template>
+            {{ scope.row.blockhash | ellipsis }}
+          </a-tooltip></template
+        ></el-table-column
       >
       <el-table-column
         prop="blocknum"
@@ -71,25 +74,39 @@
         sortable
       />
       <el-table-column prop="createdt" label="创建时间" align="center" sortable
-        ><template slot-scope="scope">{{
-          dayjs(scope.row.createdt).format("YYYY/MM/DD HH:mm:ss")
-        }}</template></el-table-column
+        ><template slot-scope="scope"
+          ><a-tag color="blue">
+            <template #icon>
+              <clock-circle-outlined />
+            </template>
+            {{ dayjs(scope.row.createdt).format("YYYY/MM/DD HH:mm:ss") }}
+          </a-tag></template
+        ></el-table-column
       >
-      <el-table-column prop="datahash" label="数据哈希" align="center" sortable
-        ><template slot-scope="scope">{{
-          scope.row.datahash | ellipsis
-        }}</template></el-table-column
+      <el-table-column prop="datahash" label="数据哈希" align="center" sortable>
+        <template slot-scope="scope">
+          <a-tooltip>
+            <template #title>{{ scope.row.datahash }}</template>
+            {{ scope.row.datahash | ellipsis }}
+          </a-tooltip></template
+        ></el-table-column
       >
       <el-table-column prop="prehash" label="前缀哈希" align="center" sortable
-        ><template slot-scope="scope">{{
-          scope.row.prehash | ellipsis
-        }}</template></el-table-column
+        ><template slot-scope="scope"
+          ><a-tooltip>
+            <template #title>{{ scope.row.prehash }}</template>
+            {{ scope.row.prehash | ellipsis }}
+          </a-tooltip></template
+        ></el-table-column
       >
       <el-table-column prop="txcount" label="tx个数" align="center" sortable />
       <el-table-column prop="txhash" label="tx哈希" align="center" sortable
-        ><template slot-scope="scope">{{
-          scope.row.txhash[0] | ellipsis
-        }}</template></el-table-column
+        ><template slot-scope="scope">
+          <a-tooltip>
+            <template #title>{{ scope.row.txhash[0] }}</template>
+            {{ scope.row.txhash[0] | ellipsis }}
+          </a-tooltip>
+        </template></el-table-column
       >
     </el-table>
 

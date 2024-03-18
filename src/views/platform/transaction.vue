@@ -42,7 +42,7 @@
     <el-table
       :data="tableData"
       v-loading="listLoading"
-      element-loading-text="Loading"
+      element-loading-text="加载中"
       stripe
       fit
       highlight-current-row
@@ -72,11 +72,14 @@
       />
       <el-table-column prop="txhash" label="tx哈希" align="center" sortable
         ><template slot-scope="scope"
-          ><el-link
-            @click="openDialog(scope.row.txhash)"
-            type="primary"
-            :underline="false"
-            >{{ scope.row.txhash | ellipsis }}</el-link
+          ><a-tooltip>
+            <template #title> {{ scope.row.txhash }} 点击查看交易详情</template>
+            <el-link
+              @click="openDialog(scope.row.txhash)"
+              type="primary"
+              :underline="false"
+              >{{ scope.row.txhash | ellipsis }}</el-link
+            ></a-tooltip
           ></template
         ></el-table-column
       >

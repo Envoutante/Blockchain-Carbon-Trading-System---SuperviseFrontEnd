@@ -38,28 +38,6 @@
       </el-form-item>
     </el-form>
 
-    <el-form :inline="true" class="demo-form-inline">
-      <el-form-item>
-        <router-link :to="'/ccredits/edit'">
-          <el-button
-            size="small"
-            type="success"
-            icon="el-icon-circle-plus-outline"
-            style="margin: 0 10px 0 0"
-            >批量添加</el-button
-          >
-        </router-link>
-
-        <el-button
-          size="small"
-          type="primary"
-          icon="el-icon-edit-outline"
-          @click="batchEditVisible = true"
-          >批量编辑</el-button
-        >
-      </el-form-item>
-    </el-form>
-
     <!-- 批量编辑的对话框 -->
     <el-dialog
       title="批量编辑碳配额"
@@ -126,9 +104,9 @@
         :filter-method="filterCompany"
         filter-placement="bottom-end"
         ><template slot-scope="scope">
-          <el-tag effect="plain" type="success">
+          <a-tag color="purple">
             {{ scope.row.enterpriseClass | companyFilter }}
-          </el-tag>
+          </a-tag>
         </template></el-table-column
       >
       <el-table-column
@@ -197,19 +175,45 @@
     </el-dialog>
 
     <!-- 分页 -->
-    <div style="display: flex; justify-content: right">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pageNum"
-        :page-sizes="[10, 20, 30, 50]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="this.emissionListLength"
-        style="padding: 30px 0"
-      >
-      </el-pagination>
-    </div>
+    <el-row type="flex" justify="space-between">
+      <el-col :span="12" style="display: flex; align-items: center">
+        <div>
+          <router-link :to="'/ccredits/edit'">
+            <el-button
+              plain
+              size="small"
+              type="success"
+              icon="el-icon-circle-plus-outline"
+              style="margin: 0 10px 0 0"
+              >批量添加</el-button
+            >
+          </router-link>
+
+          <el-button
+            plain
+            size="small"
+            type="primary"
+            icon="el-icon-edit-outline"
+            @click="batchEditVisible = true"
+            >批量编辑</el-button
+          >
+        </div>
+      </el-col>
+
+      <el-col :span="12">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageNum"
+          :page-sizes="[10, 20, 30, 50]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="this.emissionListLength"
+          style="padding: 30px 0; float: right"
+        >
+        </el-pagination>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
