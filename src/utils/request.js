@@ -15,6 +15,7 @@ const service = axios.create({
 service.interceptors.request.use(
   (config) => {
     // do something before request is sent
+    console.log(config);
     // config.url = "https://8.137.108.102:8080" + config.url;
 
     if (store.getters.token) {

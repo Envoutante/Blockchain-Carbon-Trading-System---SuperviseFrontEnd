@@ -54,7 +54,7 @@
         stripe
         fit
         highlight-current-row
-        :default-sort="{ prop: 'tradeID', order: 'descending' }"
+        :default-sort="{ prop: 'tradeID', order: 'ascending' }"
       >
         <el-table-column
           prop="tradeID"
@@ -115,7 +115,10 @@
           label="甲方企业"
           align="center"
           sortable
-        />
+          ><template slot-scope="scope"
+            ><a-tag color="cyan">{{ scope.row.publishName }}</a-tag></template
+          ></el-table-column
+        >
         <el-table-column
           prop="orderCount"
           label="关联交易数"

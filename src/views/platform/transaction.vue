@@ -60,9 +60,11 @@
         sortable
       />
       <el-table-column prop="createdt" label="创建时间" align="center" sortable
-        ><template slot-scope="scope">{{
-          dayjs(scope.row.createdt).format("YYYY/MM/DD HH:mm:ss")
-        }}</template></el-table-column
+        ><template slot-scope="scope"
+          ><a-tag color="blue">
+            {{ dayjs(scope.row.createdt).format("YYYY/MM/DD HH:mm:ss") }}</a-tag
+          ></template
+        ></el-table-column
       >
       <el-table-column
         prop="creator_msp_id"
@@ -73,7 +75,7 @@
       <el-table-column prop="txhash" label="tx哈希" align="center" sortable
         ><template slot-scope="scope"
           ><a-tooltip>
-            <template #title> {{ scope.row.txhash }} 点击查看交易详情</template>
+            <template #title>点击查看交易详情</template>
             <el-link
               @click="openDialog(scope.row.txhash)"
               type="primary"

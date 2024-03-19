@@ -43,7 +43,6 @@
       title="批量编辑碳配额"
       :visible.sync="batchEditVisible"
       width="30%"
-      :before-close="handleClose"
     >
       <span style="display: flex; justify-content: center">
         <el-input-number
@@ -165,29 +164,45 @@
           ></el-input>
         </el-form-item>
         <el-form-item label="碳币总量" :label-width="formLabelWidth">
-          <el-input-number v-model="newCoCoin" :min="1" :max="2000" />
+          <el-input-number v-model="newCoCoin" :min="0" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateCcredits">确 定</el-button>
+        <el-button @click="dialogFormVisible = false" :disabled="updateLoad"
+          >取 消</el-button
+        >
+        <el-button
+          type="primary"
+          @click="updateCcredits"
+          :loading="updateLoad"
+          >{{ buttonText }}</el-button
+        >
       </div>
     </el-dialog>
+
+    <!-- 批量增加的抽屉 -->
+    <el-drawer
+      title="✒️批量添加碳配额"
+      :visible.sync="editDrawer"
+      direction="rtl"
+      size="50%"
+    >
+      <edit-page />
+    </el-drawer>
 
     <!-- 分页 -->
     <el-row type="flex" justify="space-between">
       <el-col :span="12" style="display: flex; align-items: center">
         <div>
-          <router-link :to="'/ccredits/edit'">
-            <el-button
-              plain
-              size="small"
-              type="success"
-              icon="el-icon-circle-plus-outline"
-              style="margin: 0 10px 0 0"
-              >批量添加</el-button
-            >
-          </router-link>
+          <el-button
+            plain
+            size="small"
+            type="success"
+            icon="el-icon-circle-plus-outline"
+            style="margin: 0 10px 0 0"
+            @click="editDrawer = true"
+            >批量添加</el-button
+          >
 
           <el-button
             plain
@@ -214,14 +229,28 @@
         </el-pagination>
       </el-col>
     </el-row>
+
+    <!-- <div style="padding: 0 20px; margin-top: 50px; color: #909399">
+      <h3>⚠️碳币余额 = 碳币总量 - 剩余碳排放量</h3>
+      <p>
+        剩余碳排放量是指在特定时间范围内，某个国家或企业尚未排放的碳排放量。
+        是指个人或企业通过减少碳排放获得的碳币数量，可以用于购买碳抵消项目或产品。
+        碳币总量（碳配额）是指在特定时间范围内，某个国家或企业分配给各方的碳币总数。
+        剩余碳排放量和碳币余额之间的关系是，剩余碳排放量决定了碳币的供需关系，而碳币余额则反映了个人或企业的碳排放减少表现。
+        碳币总量则是制定碳交易市场的基础，决定了碳排放权的分配。
+      </p>
+    </div> -->
   </div>
 </template>
 
 <script>
 import ccreditsAPI from "@/api/ccredits";
 import Cookies from "js-cookie";
+import editPage from "./edit.vue";
 
 export default {
+  components: { editPage },
+
   filters: {
     companyFilter(type) {
       const companyMap = {
@@ -242,6 +271,9 @@ export default {
 
   data() {
     return {
+      buttonText: "确认",
+      updateLoad: false,
+      editDrawer: false,
       selectedRow: [],
       tableData: {},
       emissionList: {},
@@ -254,6 +286,7 @@ export default {
         coCoin: "",
       },
       enterpriseIDList: [],
+      oldCoCoin: 0,
       newCoCoin: 0,
       newEmission: 0,
       listLoading: true,
@@ -276,6 +309,10 @@ export default {
   },
 
   methods: {
+    closeEditDrawer() {
+      this.editDrawer = false;
+    },
+
     handleSearch() {
       let form = this.searchForm;
       let tableList = this.emissionList;
@@ -308,22 +345,48 @@ export default {
     editCcredits(emissionItem) {
       this.dialogFormVisible = true;
       this.emissionItem = emissionItem;
-      this.newCoCoin = emissionItem.remainEmission + emissionItem.coCoin;
+      this.oldCoCoin = emissionItem.remainEmission + emissionItem.coCoin;
+      this.newCoCoin = this.oldCoCoin;
       console.log("打印：" + this.emissionItem.enterpriseID);
     },
 
     // 点击提交按钮
     updateCcredits() {
-      let token = Cookies.get("token");
-      ccreditsAPI
-        .addEmission(token, this.emissionItem.enterpriseID, this.newCoCoin)
-        .then((response) => {
+      this.$confirm(
+        "确认是否继续执行此操作，该操作将对选定企业的碳排放配额产生影响。是否继续？",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      )
+        .then(() => {
+          this.updateLoad = true;
+          this.buttonText = "提交中";
+          let token = Cookies.get("token");
+          ccreditsAPI
+            .updateEmission(
+              token,
+              this.emissionItem.enterpriseID,
+              parseInt(this.newCoCoin) - parseInt(this.oldCoCoin)
+            )
+            .then(() => {
+              this.updateLoad = false;
+              this.$message({
+                message: "碳配额编辑成功！",
+                type: "success",
+              });
+              this.buttonText = "确认";
+              this.dialogFormVisible = false;
+              this.fetchData();
+            });
+        })
+        .catch(() => {
           this.$message({
-            message: "碳配额编辑成功！",
-            type: "success",
+            type: "info",
+            message: "已取消编辑操作",
           });
-          this.dialogFormVisible = false;
-          this.fetchData();
         });
     },
 
@@ -437,6 +500,11 @@ export default {
 
 #myText {
   width: 300px;
+}
+
+.el-drawer__header {
+  font-size: 20px !important;
+  color: #303133 !important;
 }
 </style>
 

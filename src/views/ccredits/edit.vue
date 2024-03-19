@@ -1,23 +1,9 @@
 <template>
-  <div class="app-container">
+  <div style="400px">
     <div class="content-container">
-      <el-form label-width="200px" style="margin-top: 20px" id="input"
-        ><el-row>
-          <el-col :span="10">
-            <el-form-item label="统一设置碳配额：">
-              <el-input
-                style="width: 200px; float: left"
-                v-model="emission"
-              ></el-input>
-            </el-form-item>
-          </el-col> </el-row
-      ></el-form>
-
-      <a-divider />
-
       <!-- 循环data中定义的数组 -->
       <div v-for="(item, index) in enterpriseIDList" :key="index">
-        <el-form label-width="200px" id="input" style="margin-top: 20px">
+        <el-form label-width="200px" id="input">
           <el-form-item :label="'企业 ' + (index + 1) + ' 组织机构代码：'">
             <el-input
               style="width: 200px; float: left"
@@ -47,30 +33,26 @@
           </el-form-item>
         </el-form>
       </div>
+    </div>
 
-      <a-divider style="margin-top: 50px" />
+    <div class="footer" style="width: 50%; position: fixed; bottom: 30px">
+      <a-divider style="margin-bottom: 50px" />
 
       <!-- 操作按钮 -->
-      <div style="display: flex; justify-content: center; margin-top: 30px">
-        <router-link :to="'/ccredits/list'">
-          <el-button size="small">返回</el-button></router-link
-        >
+      <el-form label-width="200px" style="margin-bottom: 100px" id="input">
+        <el-form-item label="统一设置碳配额：">
+          <el-input
+            style="width: 200px; float: left"
+            v-model="emission"
+          ></el-input>
+        </el-form-item>
+      </el-form>
 
-        <el-button
-          @click="submitForm"
-          style="margin-left: 20px"
-          type="primary"
-          size="small"
-          >提交</el-button
+      <div style="position: fixed; bottom: 30px; right: 30px">
+        <a-button @click="closeDrawer" type="danger">关闭</a-button>
+        <a-button @click="submitForm" style="margin-left: 20px" type="primary"
+          >提交</a-button
         >
-        <!-- <el-button @click="addForm" type="primary" size="small">添加</el-button>
-        <el-button
-          v-if="enterpriseIDList.length > 1"
-          @click="removeIdx(item, index)"
-          type="danger"
-          size="small"
-          >删除</el-button
-        > -->
       </div>
     </div>
   </div>
@@ -93,6 +75,10 @@ export default {
     };
   },
   methods: {
+    closeDrawer() {
+      this.$parent.closeDrawer();
+    },
+
     // 提交操作
     submitForm() {
       let statusType = true;
@@ -173,32 +159,12 @@ h3 {
 }
 .content-container {
   background-color: #ffffff !important;
-  padding: 20px 20px;
-  margin-bottom: 10px;
   border-radius: 5px;
+  margin-top: 20px;
 }
 
-.el-input.is-disabled /deep/ .el-input__inner {
-  color: #000000 !important;
-}
-
-*/deep/.el-input-group__append {
-  border-left: 0;
-  width: 90px;
-  height: 40px;
-  padding: 0;
-  font-size: 0;
-}
-
-#input /deep/.el-input__inner {
-  border-radius: 0px;
-  border-top-width: 0px;
-  border-left-width: 0px;
-  border-right-width: 0px;
-  border-bottom-width: 2px;
-  height: 25px;
-  padding: 0px 10px;
-  border-bottom-color: rgba(24, 144, 255, 1);
-  background-color: transparent !important;
+.el-form-item /deep/ .el-form-item__label {
+  font-weight: 500 !important;
+  color: #72767b !important;
 }
 </style>

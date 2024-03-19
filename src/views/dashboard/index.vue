@@ -1,5 +1,5 @@
 <template>
-  <div style="background-color: #f7f9fe">
+  <div class="dashboard-container" style="background-color: #f7f9fe">
     <!-- 用户欢迎 -->
     <div style="height: 150px; background-color: #134089; padding: 20px">
       <div style="float: left; margin-left: 20px">
@@ -74,7 +74,9 @@
               </div>
               <div>
                 <el-statistic title="交易数量">
-                  <template slot="formatter"> {{ headData.txCount }} </template>
+                  <template slot="formatter">
+                    {{ headData.txCount }}
+                  </template>
                 </el-statistic>
               </div>
             </div>
@@ -213,12 +215,12 @@
           <el-card>
             <div
               id="main"
-              style="width: 100%; height: 520px; background: #fff"
+              style="width: 100%; height: 400px; background: #fff"
             ></div>
           </el-card>
 
           <router-link :to="'/email'">
-            <el-card style="margin: 20px 0; height: 300px">
+            <el-card style="margin: 20px 0; height: 325px">
               <div
                 style="font-size: 16px; font-weight: 600; margin-bottom: 10px"
               >
@@ -240,7 +242,6 @@
 import Cookies from "js-cookie";
 import * as echarts from "echarts";
 import dashboardAPI from "@/api/dashboard";
-import dayjs from "dayjs";
 
 export default {
   filters: {
@@ -410,7 +411,11 @@ export default {
         contentType: "application/json",
       }).then((res) => {
         this.EmailDetailList = res.data.rows;
+
+        // 画轮播表格
         this.getShowData();
+        // 更新轮播表格
+        this.emailConfig = { ...this.emailConfig };
       });
     },
 

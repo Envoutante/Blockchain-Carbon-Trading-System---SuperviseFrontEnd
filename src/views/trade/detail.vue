@@ -2,7 +2,7 @@
   <div style="padding: 20px; background-color: #ffffff">
     <div style="font-size: 20px; margin-bottom: 10px">🔍关联交易查询</div>
 
-    <div style="height: 750px" class="scrollable-div">
+    <div style="height: 550px" class="scrollable-div">
       <el-descriptions
         v-for="(order, index) in this.orderList"
         :key="index"
@@ -15,15 +15,20 @@
         <el-descriptions-item :span="2">
           <template slot="label">
             <i class="el-icon-document"></i>
-            交易编号 </template
-          ><el-link
-            @click="openDialog(order.orderID)"
-            type="primary"
-            :underline="false"
-            style="margin-left: 10px"
-          >
-            {{ order.orderID }}</el-link
-          >
+            交易编号
+          </template>
+          <a-tooltip>
+            <template #title>点击溯源交易事务</template>
+
+            <el-link
+              @click="openDialog(order.orderID)"
+              type="primary"
+              :underline="false"
+              style="margin-left: 10px"
+            >
+              {{ order.orderID }}</el-link
+            >
+          </a-tooltip>
         </el-descriptions-item>
 
         <el-descriptions-item>
@@ -47,13 +52,12 @@
             <i class="el-icon-shopping-cart-1"></i>
             交易类型
           </template>
-          {{
-            order.tradeType === "SOLD"
-              ? "收购碳排量"
-              : order.tradeType === "SALE"
-              ? "出售碳排量"
-              : ""
-          }}
+          <span v-if="order.tradeType === 'SOLD'">
+            <a-tag color="#108ee9">收购碳排量</a-tag></span
+          >
+          <span v-else-if="order.tradeType === 'SALE'"
+            ><a-tag color="#f50">出售碳排量</a-tag></span
+          >
         </el-descriptions-item>
 
         <el-descriptions-item>
@@ -79,7 +83,7 @@
 
       <div
         style="
-          height: 700px;
+          height: 550px;
           display: flex;
           justify-content: center;
           align-items: center;

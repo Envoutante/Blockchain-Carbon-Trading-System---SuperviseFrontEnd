@@ -21,7 +21,7 @@
       <div style="display: flex; justify-content: center">
         <el-form
           style="margin-top: 10px"
-          label-width="200px"
+          label-width="150px"
           class="form-table"
           v-loading="loading"
         >
@@ -34,7 +34,7 @@
           </el-form-item>
 
           <el-form-item label="企业组织机构代码：">
-            <el-input :value="bindDetail.enterpriseID" disabled></el-input>
+            <a-tag color="pink">{{ bindDetail.enterpriseID }}</a-tag>
           </el-form-item>
 
           <el-form-item label="企业性质：">

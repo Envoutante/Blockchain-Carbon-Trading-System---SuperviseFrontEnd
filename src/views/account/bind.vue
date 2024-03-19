@@ -47,6 +47,7 @@
       style="width: 100%"
       stripe
       v-loading="listLoading"
+      :default-sort="{ prop: 'userID', order: 'ascending' }"
     >
       <el-table-column type="selection" width="50" align="center" />
       <el-table-column prop="userID" label="账户编号" align="center" sortable />

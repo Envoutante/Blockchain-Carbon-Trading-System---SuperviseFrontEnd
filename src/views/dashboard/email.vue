@@ -2,19 +2,19 @@
   <div class="app-container">
     <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline">
-      <el-form-item label="邮件编号">
+      <el-form-item label="收信企业">
         <el-input
-          v-model="searchForm.id"
+          v-model="searchForm.to_enterpriseName"
           size="small"
-          placeholder="请输入邮件编号"
+          placeholder="请输入收信企业"
         />
       </el-form-item>
 
-      <el-form-item label="发信模板ID">
+      <el-form-item label="收信邮箱">
         <el-input
-          v-model="searchForm.template_id"
+          v-model="searchForm.to_email"
           size="small"
-          placeholder="请输入发信模板ID"
+          placeholder="请输入收信邮箱"
         />
       </el-form-item>
 
@@ -108,9 +108,6 @@
         sortable
         ><template slot-scope="scope"
           ><a-tag color="blue">
-            <template #icon>
-              <clock-circle-outlined />
-            </template>
             {{ dayjs(scope.row.created_at).format("YYYY/MM/DD HH:mm:ss") }}
           </a-tag></template
         ></el-table-column
@@ -134,12 +131,12 @@
 </template>
 
 <script>
-import { ClockCircleOutlined } from "@ant-design/icons-vue";
+// import { ClockCircleOutlined } from "@ant-design/icons-vue";
 
 export default {
-  components: {
-    ClockCircleOutlined,
-  },
+  // components: {
+  //   ClockCircleOutlined,
+  // },
 
   filters: {
     sendFilter(status) {
@@ -173,7 +170,7 @@ export default {
       EmailDetailparam: {},
       EmailDetailList: [],
       tableData: [],
-      searchForm: { id: "", template_id: "" },
+      searchForm: { to_enterpriseName: "", to_email: "" },
       pageNum: 1,
       pageSize: 10,
     };
@@ -219,15 +216,16 @@ export default {
     handleSearch() {
       let form = this.searchForm;
       let tableList = this.EmailDetailList;
-      // 筛选后的数据
+
       const filterList = tableList.filter((item) => {
+        // 只使用item中的部分内容进行过滤
+        const template_params = JSON.parse(item.template_params);
+        const to_enterpriseName = template_params.to_enterpriseName;
+        const to_email = template_params.to_email;
+        let sub_item = { to_enterpriseName, to_email };
+
         return Object.values(form).every((key, index) => {
-          // 使用String()将item中的整数转换为字符串
-          const itemKey = String(item[Object.keys(form)[index]]);
-          // 确保form中的值也是字符串类型
-          const formValue = String(key);
-          // 现在可以安全地进行字符串比较
-          return itemKey.includes(formValue);
+          return sub_item[Object.keys(form)[index]].includes(key);
         });
       });
 
@@ -235,8 +233,8 @@ export default {
     },
     handleReset() {
       this.tableData = this.EmailDetailList;
-      this.searchForm.id = "";
-      this.searchForm.template_id = "";
+      this.searchForm.to_enterpriseName = "";
+      this.searchForm.to_email = "";
     },
 
     filterStatus(value, row) {

@@ -90,7 +90,7 @@
           { text: '审核通过', value: 'PASS' },
           { text: '审核中', value: 'AUDIT' },
           { text: '审核拒绝', value: 'REFUSE' },
-          { text: '待审核', value: 'WAIT' },
+          { text: '尚未提交', value: 'WAIT' },
         ]"
         :filter-method="filterStatus"
         filter-placement="bottom-end"
@@ -121,7 +121,7 @@
         align="center"
         sortable
       />
-      <el-table-column label="操作" width="200" align="center">
+      <el-table-column label="操作" width="200" align="left">
         <template slot-scope="scope">
           <router-link
             :to="
@@ -135,19 +135,22 @@
             <el-link type="primary" :underline="false">详情</el-link>
           </router-link>
 
-          <el-link
-            v-if="
-              scope.row.auditStatus != 'PASS' &&
-              scope.row.auditStatus != 'AUDIT' &&
-              (scope.row.enterpriseID != linkID ||
-                scope.row.taskYear.toString() != linkYear ||
-                !linkLoad)
-            "
-            @click="sendEmail(scope.row.enterpriseID, scope.row.taskYear)"
-            type="primary"
-            :underline="false"
-            >邮件提醒</el-link
-          >
+          <a-tooltip>
+            <template #title>点击即可发送邮件</template>
+            <el-link
+              v-if="
+                scope.row.auditStatus != 'PASS' &&
+                scope.row.auditStatus != 'AUDIT' &&
+                (scope.row.enterpriseID != linkID ||
+                  scope.row.taskYear.toString() != linkYear ||
+                  !linkLoad)
+              "
+              @click="sendEmail(scope.row.enterpriseID, scope.row.taskYear)"
+              type="primary"
+              :underline="false"
+              >邮件提醒</el-link
+            >
+          </a-tooltip>
 
           <el-link
             v-if="
@@ -197,7 +200,7 @@ export default {
         PASS: "审核通过",
         AUDIT: "审核中",
         REFUSE: "审核拒绝",
-        WAIT: "待审核",
+        WAIT: "尚未提交",
       };
       return statusMap[status];
     },
