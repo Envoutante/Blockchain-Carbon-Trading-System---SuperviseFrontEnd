@@ -72,7 +72,7 @@
         align="center"
         sortable
       />
-      <el-table-column prop="txhash" label="tx哈希" align="center" sortable
+      <el-table-column prop="txhash" label="交易哈希" align="center" sortable
         ><template slot-scope="scope"
           ><a-tooltip>
             <template #title>点击查看交易详情</template>
@@ -85,7 +85,14 @@
           ></template
         ></el-table-column
       >
-      <el-table-column prop="type" label="类型" align="center" sortable />
+      <el-table-column prop="type" label="交易类型" align="center" sortable>
+        <template slot-scope="scope">
+          <span v-if="scope.row.type === 'ENDORSER_TRANSACTION'">
+            <a-tag color="#f50">背书交易</a-tag></span
+          >
+          <span v-else><a-tag color="#108ee9">承诺交易</a-tag></span>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 对话框：交易事务日志 -->

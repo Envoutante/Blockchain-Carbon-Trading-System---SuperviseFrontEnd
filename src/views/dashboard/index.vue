@@ -147,9 +147,9 @@
                 align="center"
                 ><template slot-scope="scope">
                   <a-tag v-if="scope.row.status === 'UP'" color="green"
-                    >好得很</a-tag
+                    >在线</a-tag
                   >
-                  <a-tag v-else color="red">不太行</a-tag>
+                  <a-tag v-else color="red">离线</a-tag>
                 </template></el-table-column
               ></el-table
             >
@@ -513,8 +513,6 @@ export default {
         yAxis: {
           type: "value",
           boundaryGap: true,
-          splitNumber: 4,
-          max: 20,
         },
 
         series: [

@@ -53,7 +53,7 @@
         align="center"
         sortable
       />
-      <el-table-column prop="blockhash" label="哈希值" align="center" sortable
+      <el-table-column prop="blockhash" label="区块哈希" align="center" sortable
         ><template slot-scope="scope"
           ><a-tooltip>
             <template #title>{{ scope.row.blockhash }}</template>
@@ -91,7 +91,11 @@
           </a-tooltip></template
         ></el-table-column
       >
-      <el-table-column prop="prehash" label="前缀哈希" align="center" sortable
+      <el-table-column
+        prop="prehash"
+        label="前一个区块哈希"
+        align="center"
+        sortable
         ><template slot-scope="scope"
           ><a-tooltip>
             <template #title>{{ scope.row.prehash }}</template>
@@ -99,8 +103,13 @@
           </a-tooltip></template
         ></el-table-column
       >
-      <el-table-column prop="txcount" label="tx个数" align="center" sortable />
-      <el-table-column prop="txhash" label="tx哈希" align="center" sortable
+      <el-table-column
+        prop="txcount"
+        label="交易数量"
+        align="center"
+        sortable
+      />
+      <el-table-column prop="txhash" label="交易哈希" align="center" sortable
         ><template slot-scope="scope">
           <a-tooltip>
             <template #title>{{ scope.row.txhash[0] }}</template>

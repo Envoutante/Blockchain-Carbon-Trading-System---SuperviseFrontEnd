@@ -218,12 +218,10 @@ export default {
       });
     },
     handleSubmit() {
-      if (!this.auditStatus && this.auditOpinion) {
+      if (!this.auditStatus) {
         this.noResult();
-      } else if (this.auditStatus && !this.auditOpinion) {
+      } else if (this.auditStatus == "REFUSE" && !this.auditOpinion) {
         this.noOpinion();
-      } else if (!this.auditStatus && !this.auditOpinion) {
-        this.noBoth();
       }
       this.enterpriseIDList.push(this.bindDetail.enterpriseID);
       console.log(this.enterpriseIDList);
@@ -242,7 +240,7 @@ export default {
 
             this.$notify({
               title: "通知",
-              message: h("i", { style: "color: teal" }, response.message),
+              message: h("i", { style: "color: teal" }, "审核成功！"),
             });
 
             this.$router.push("/account/bind");
