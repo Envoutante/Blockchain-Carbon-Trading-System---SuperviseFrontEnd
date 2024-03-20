@@ -515,3 +515,9 @@ export default {
   }
 }
 </style>
+
+<style scoped>
+.el-input.is-disabled /deep/ .el-input__inner {
+  color: #606266 !important;
+}
+</style>

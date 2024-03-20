@@ -88,7 +88,9 @@
             }"
             style="margin-right: 10px"
           >
-            <el-link type="primary" :underline="false">审核</el-link>
+            <el-link type="primary" :underline="false">{{
+              scope.row.bindStatus == "PASS" ? "详情" : "审核"
+            }}</el-link>
           </router-link>
         </template>
         <el-button

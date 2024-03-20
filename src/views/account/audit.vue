@@ -58,14 +58,23 @@
           </el-form-item>
 
           <el-form-item label="企业简介：">
-            {{ bindDetail.enterpriseDescription }}
+            <el-input
+              style="width: 400px"
+              type="textarea"
+              :rows="2"
+              :value="bindDetail.enterpriseDescription"
+              resize="none"
+              autosize
+              disabled
+            >
+            </el-input>
           </el-form-item>
         </el-form>
       </div>
 
-      <a-divider v-if="bindStatus === 'PASS'" />
+      <a-divider v-if="bindStatus !== 'PASS'" />
 
-      <div v-if="bindStatus === 'PASS'">
+      <div v-if="bindStatus !== 'PASS'">
         <el-row type="flex" justify="center">
           <el-col :span="10">
             <el-form
@@ -98,11 +107,23 @@
         </el-row>
       </div>
 
-      <div style="display: flex; justify-content: center; margin-top: 20px">
+      <div
+        v-if="bindStatus !== 'PASS'"
+        style="display: flex; justify-content: center; margin-top: 20px"
+      >
         <router-link :to="'/account/bind/'" style="margin-right: 30px">
           <el-button>返回</el-button>
         </router-link>
-        <el-button type="primary" @click="handleSubmit">提交</el-button>
+        <el-button type="primary" @click="handleSubmit">审核</el-button>
+      </div>
+
+      <div
+        v-else
+        style="display: flex; justify-content: center; margin-top: 20px"
+      >
+        <router-link :to="'/account/bind/'" style="margin-right: 30px">
+          <el-button>返回上一级</el-button>
+        </router-link>
       </div>
     </div>
   </div>
@@ -157,9 +178,12 @@ export default {
         this.bindDetail = response.data;
         if (this.bindStatus === "WAIT") {
           this.activeStep = 1;
-        } else if (this.bindStatus === "AUDIT") {
+        } else if (
+          this.bindStatus === "AUDIT" ||
+          this.bindStatus === "REFUSE"
+        ) {
           this.activeStep = 2;
-        } else if (this.bindStatus === "PASS" || this.bindStatus === "REFUSE") {
+        } else if (this.bindStatus === "PASS") {
           this.activeStep = 3;
         }
         this.loading = false;
@@ -239,6 +263,10 @@ export default {
 }
 
 .el-input.is-disabled /deep/ .el-input__inner {
-  color: #000000 !important;
+  color: #606266 !important;
+}
+
+.el-textarea.is-disabled /deep/ .el-textarea__inner {
+  color: #606266 !important;
 }
 </style>
