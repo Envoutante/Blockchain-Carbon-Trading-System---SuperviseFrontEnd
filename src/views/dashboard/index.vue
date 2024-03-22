@@ -139,7 +139,11 @@
         <el-col :span="11">
           <el-card>
             <el-table :data="peerStatus" stripe border style="width: 100%">
-              <el-table-column prop="requests" label="配对名" align="center" />
+              <el-table-column
+                prop="requests"
+                label="对等节点名"
+                align="center"
+              />
               <el-table-column
                 prop="status"
                 label="状态"

@@ -114,7 +114,9 @@
         <router-link :to="'/account/bind/'" style="margin-right: 30px">
           <el-button>返回</el-button>
         </router-link>
-        <el-button type="primary" @click="handleSubmit">审核</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading"
+          >提交</el-button
+        >
       </div>
 
       <div
@@ -161,6 +163,7 @@ export default {
       auditStatus: "",
       auditOpinion: "",
       enterpriseIDList: [],
+      submitLoading: false,
     };
   },
 
@@ -223,10 +226,16 @@ export default {
       } else if (this.auditStatus == "REFUSE" && !this.auditOpinion) {
         this.noOpinion();
       }
+
+      this.enterpriseIDList = new Array();
       this.enterpriseIDList.push(this.bindDetail.enterpriseID);
       console.log(this.enterpriseIDList);
 
-      if (this.auditStatus && this.auditOpinion) {
+      if (
+        this.auditStatus == "PASS" ||
+        (this.auditStatus == "REFUSE" && this.auditOpinion)
+      ) {
+        this.submitLoading = true;
         let token = Cookies.get("token");
         auditAPI
           .submitAuditResult(
@@ -243,7 +252,18 @@ export default {
               message: h("i", { style: "color: teal" }, "审核成功！"),
             });
 
+            this.submitLoading = false;
             this.$router.push("/account/bind");
+          })
+          .catch((err) => {
+            const h = this.$createElement;
+
+            this.$notify({
+              title: "通知",
+              message: h("i", { style: "color: teal" }, err),
+            });
+
+            this.submitLoading = false;
           });
       }
     },
