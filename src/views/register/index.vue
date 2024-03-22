@@ -129,8 +129,8 @@
                           p-id="6905"
                         ></path></svg
                       >&ensp;切换英文(Switch to English)</router-link
-                    ><router-link
-                      :to="'/user/forget'"
+                    ><a
+                      href="https://jjq0425.me/Blockchain-Carbon-Trading-System---EnterpriseFrontEnd"
                       style="float: right; color: #134089"
                       >前往企业端&ensp;<svg
                         t="1709624225353"
@@ -149,7 +149,7 @@
                           opacity=".65"
                           p-id="9067"
                         ></path></svg
-                    ></router-link></div
+                    ></a></div
                 ></el-form-item>
               </el-form>
             </div>
