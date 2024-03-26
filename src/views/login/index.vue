@@ -233,8 +233,8 @@ export default {
 
     return {
       loginForm: {
-        userName: "cstring",
-        userPwd: "cstring",
+        userName: "admin",
+        userPwd: "admin",
         // 正式版
         // userName: this.$route.query.userName,
         // userPwd: this.$route.query.userPwd,

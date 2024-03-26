@@ -112,7 +112,7 @@
         style="display: flex; justify-content: center; margin-top: 20px"
       >
         <router-link :to="'/account/bind/'" style="margin-right: 30px">
-          <el-button>返回</el-button>
+          <el-button :disabled="submitLoading">返回</el-button>
         </router-link>
         <el-button type="primary" @click="handleSubmit" :loading="submitLoading"
           >提交</el-button

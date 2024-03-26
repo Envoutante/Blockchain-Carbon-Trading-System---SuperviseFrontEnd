@@ -38,31 +38,13 @@
       </el-form-item>
     </el-form>
 
-    <!-- 批量编辑的对话框 -->
-    <el-dialog
-      title="批量编辑碳配额"
-      :visible.sync="batchEditVisible"
-      width="30%"
-    >
-      <span style="display: flex; justify-content: center">
-        <el-input-number
-          v-model="newEmission"
-          size="medium"
-          :min="0"
-          :max="2000"
-          style="margin: auto"
-      /></span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="batchEditVisible = false">取 消</el-button>
-        <el-button type="primary" @click="batchEdit">提 交</el-button>
-      </span>
-    </el-dialog>
-
+    <!-- 表格 -->
     <el-table
       :data="tableData.slice(pageBegin, pageEnd)"
-      style="width: 100%"
-      stripe
       v-loading="listLoading"
+      element-loading-text="加载中"
+      stripe
+      fit
       :row-key="(val) => val.enterpriseID"
       @selection-change="(val) => (selectedRow = val)"
       :default-sort="{ prop: 'enterpriseID', order: 'descending' }"
@@ -115,7 +97,7 @@
         sortable
       />
       <el-table-column prop="coCoin" label="碳币余额" align="center" sortable />
-      <el-table-column label="操作" width="200" align="center">
+      <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-link
             type="primary"
@@ -190,6 +172,29 @@
       <edit-page />
     </el-drawer>
 
+    <!-- 批量编辑的对话框 -->
+    <el-dialog
+      title="批量编辑碳配额"
+      :visible.sync="batchEditVisible"
+      width="30%"
+    >
+      <span style="display: flex; justify-content: center">
+        <el-input-number
+          v-model="newBatchEmission"
+          size="medium"
+          :min="0"
+          style="margin: auto"
+      /></span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="batchEditVisible = false" :disabled="updateLoad"
+          >取 消</el-button
+        >
+        <el-button type="primary" @click="batchEdit" :loading="updateLoad">{{
+          buttonText
+        }}</el-button>
+      </span>
+    </el-dialog>
+
     <!-- 分页 -->
     <el-row type="flex" justify="space-between">
       <el-col :span="12" style="display: flex; align-items: center">
@@ -229,17 +234,6 @@
         </el-pagination>
       </el-col>
     </el-row>
-
-    <!-- <div style="padding: 0 20px; margin-top: 50px; color: #909399">
-      <h3>⚠️碳币余额 = 碳币总量 - 剩余碳排放量</h3>
-      <p>
-        剩余碳排放量是指在特定时间范围内，某个国家或企业尚未排放的碳排放量。
-        是指个人或企业通过减少碳排放获得的碳币数量，可以用于购买碳抵消项目或产品。
-        碳币总量（碳配额）是指在特定时间范围内，某个国家或企业分配给各方的碳币总数。
-        剩余碳排放量和碳币余额之间的关系是，剩余碳排放量决定了碳币的供需关系，而碳币余额则反映了个人或企业的碳排放减少表现。
-        碳币总量则是制定碳交易市场的基础，决定了碳排放权的分配。
-      </p>
-    </div> -->
   </div>
 </template>
 
@@ -275,8 +269,8 @@ export default {
       updateLoad: false,
       editDrawer: false,
       selectedRow: [],
-      tableData: {},
-      emissionList: {},
+      tableData: [],
+      emissionList: [],
       emissionListLength: undefined,
       emissionItem: {
         enterpriseID: "",
@@ -289,6 +283,7 @@ export default {
       oldCoCoin: 0,
       newCoCoin: 0,
       newEmission: 0,
+      newBatchEmission: 0,
       listLoading: true,
       dialogFormVisible: false,
       batchEditVisible: false,
@@ -408,19 +403,34 @@ export default {
           type: "warning",
         })
           .then(() => {
+            this.updateLoad = true;
+            this.buttonText = "提交中";
+            this.enterpriseIDList = new Array();
             this.selectedRow.forEach((row) => {
               this.enterpriseIDList.push(row.enterpriseID);
             });
 
             let token = Cookies.get("token");
             ccreditsAPI
-              .addEmission(token, this.enterpriseIDList, this.newEmission)
+              .batchEditEmission(
+                token,
+                this.enterpriseIDList,
+                this.newBatchEmission
+              )
               .then((response) => {
+                this.updateLoad = false;
                 this.$message({
                   type: "success",
                   message: "批量编辑成功",
                 });
                 this.fetchData();
+                this.buttonText = "提交";
+                this.batchEditVisible = false;
+              })
+              .catch(() => {
+                this.updateLoad = false;
+                this.buttonText = "提交";
+                this.batchEditVisible = false;
               });
           })
           .catch(() => {

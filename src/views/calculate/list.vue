@@ -236,8 +236,8 @@ export default {
     };
 
     return {
-      tableData: {},
-      reportList: {},
+      tableData: [],
+      reportList: [],
       reportListLength: undefined,
       listLoading: true,
       dialogFormVisible: false,
