@@ -133,6 +133,7 @@
                       font-size: 15px;
                     "
                     @click.native.prevent="handleLogin"
+                    :loading="loginLoading"
                     >监管端登录</el-button
                   ></el-form-item
                 >
@@ -264,6 +265,7 @@ export default {
       redirect: undefined,
       remember: "",
       rememberCheck: false,
+      loginLoading: false,
     };
   },
 
@@ -292,11 +294,13 @@ export default {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           this.loading = true;
+          this.loginLoading = true;
           this.$store
             .dispatch("user/login", this.loginForm)
             .then(() => {
               this.$router.push({ path: this.redirect || "/" });
               this.loading = false;
+              this.loginLoading = false;
               this.$message({
                 type: "success",
                 message: "欢迎登录碳盟链道！",
@@ -304,6 +308,7 @@ export default {
             })
             .catch(() => {
               this.loading = false;
+              this.loginLoading = false;
             });
         } else {
           this.$message({
