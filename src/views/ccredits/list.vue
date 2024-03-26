@@ -57,6 +57,7 @@
       <el-table-column
         prop="enterpriseID"
         label="企业组织机构代码"
+        width="300"
         align="center"
         sortable
       />

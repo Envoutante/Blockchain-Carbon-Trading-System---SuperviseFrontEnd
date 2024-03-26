@@ -113,6 +113,7 @@
         <el-table-column
           prop="publishName"
           label="甲方企业"
+          width="200px"
           align="center"
           sortable
           ><template slot-scope="scope"
