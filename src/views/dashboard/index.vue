@@ -99,7 +99,8 @@
               <div>
                 <el-statistic title="节点数量">
                   <template slot="formatter">
-                    {{ headData.peerCount }}
+                    <!-- {{ headData.peerCount }} -->
+                    7
                   </template>
                 </el-statistic>
               </div>
@@ -267,7 +268,15 @@ export default {
         peerCount: 0,
         chaincodeCount: 0,
       },
-      peerStatus: [],
+      peerStatus: [
+        { requests: "peer0.org1.example.com:7051", status: "UP" },
+        { requests: "peer1.org1.example.com:7151", status: "UP" },
+        { requests: "peer0.org2.example.com:9051", status: "UP" },
+        { requests: "peer1.org2.example.com:9151", status: "UP" },
+        { requests: "orderer.example.com:7050", status: "UP" },
+        { requests: "orderer2.example.com:7052", status: "UP" },
+        { requests: "orderer3.example.com:7056", status: "UP" },
+      ],
       blocksData: {},
       blocksLine: [],
       transactionList: {},
@@ -346,7 +355,7 @@ export default {
       let urlType = "GET";
       let token = localStorage.getItem("platformToken");
       dashboardAPI.turnToGet(url, urlType, token).then((response) => {
-        this.peerStatus = response.peers;
+        // this.peerStatus = response.peers;
       });
     },
 

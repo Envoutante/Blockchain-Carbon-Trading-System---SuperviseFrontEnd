@@ -50,7 +50,11 @@
 
       <div style="position: fixed; bottom: 30px; right: 30px">
         <a-button @click="closeDrawer" type="danger">关闭</a-button>
-        <a-button @click="submitForm" style="margin-left: 20px" type="primary"
+        <a-button
+          @click="submitForm"
+          :loading="submitLoading"
+          style="margin-left: 20px"
+          type="primary"
           >提交</a-button
         >
       </div>
@@ -72,6 +76,7 @@ export default {
         },
       ],
       emission: "1000",
+      submitLoading: false,
     };
   },
   methods: {
@@ -81,6 +86,8 @@ export default {
 
     // 提交操作
     submitForm() {
+      this.submitLoading = true;
+
       let statusType = true;
       this.enterpriseIDList.forEach((item) => {
         if (item.enterpriseID == "") {
@@ -98,20 +105,25 @@ export default {
       }
       if (statusType) {
         let token = Cookies.get("token");
+        let enterpriseIDList = new Array();
         for (var i = 0; i < this.enterpriseIDList.length; i++) {
-          var enterpriseID = this.enterpriseIDList[i];
-          ccreditsAPI
-            .addEmission(token, enterpriseID, this.emission)
-            .then((response) => {
-              this.$message({
-                message: response.message,
-                type: "success",
-              });
-            });
+          enterpriseIDList.push(this.enterpriseIDList[i].enterpriseID);
         }
+        ccreditsAPI
+          .addEmission(token, enterpriseIDList, parseInt(this.emission))
+          .then((response) => {
+            this.$message({
+              message: "添加碳配额成功！",
+              type: "success",
+            });
+            this.submitLoading = false;
+            this.closeDrawer();
+            this.$parent.fetchData();
+          });
       }
       console.log(this.enterpriseIDList);
     },
+
     // 添加操作
     addForm() {
       // 定义一个标识，通过标识判断是否能添加信息
